@@ -18,14 +18,12 @@ interface ProductDetailsProps {
   };
   userId: string;
 }
-
 const detailOuterContainerBox = {
   display: 'flex',
   flexDirection: 'column',
   gap: 2,
   width: '100%',
   maxWidth: '1323px',
-  height: '100%',
   boxSizing: 'border-box' as const,
   alignItems: 'center',
   justifyContent: 'center'
@@ -39,7 +37,7 @@ const typoStyle = (isMobile: boolean) => ({
 
 const imageStyle = {
   width: '100%',
-  height: 'auto',
+  height: '100%',
   borderRadius: '10px',
 };
 
@@ -84,13 +82,12 @@ const detailInnerContainerBox = (isMobile: boolean) => ({
   backgroundColor: '#FFFFFF',
   border: '1px solid #ccc',
   borderRadius: '4px',
-  justifyContent: 'center',
-  px: isMobile ? 2: 5,
+  px: isMobile ? 2 : 5,
   py: isMobile ? 2 : 5,
   boxShadow: 1,
   display: 'flex',
   flexDirection: isMobile ? 'column' : 'row',
-  alignItems: 'center',
+  alignItems: 'flex-start',
 });
 
 const imageContainerBox = (isMobile: boolean) => ({
@@ -123,6 +120,8 @@ const priceContainer = {
   flexWrap: 'wrap' as const,
   gap: '8px',
 };
+
+
 
 export const ProductDetails = ({ product, userId }: ProductDetailsProps) => {
   const theme = useTheme();
