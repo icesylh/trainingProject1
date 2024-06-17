@@ -1,11 +1,11 @@
 // components/Cart/Cart.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Button, IconButton, TextField } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
-import { addToCart, removeFromCart, applyDiscountCode } from '../../store/productsSlice';
+import { addToCart, removeFromCart, removeItemFromCart, applyDiscountCode } from '../../store/productsSlice';
 import { useMediaQuery, useTheme } from '@mui/material';
 import { useParams } from 'react-router-dom';
 
@@ -22,7 +22,11 @@ interface Product {
     discount: number;
 }
 
-const Cart = () => {
+interface CartProps {
+    onClose: () => void;
+}
+
+const Cart = ({ onClose }: CartProps) => {
     const dispatch = useDispatch();
     const { userId } = useParams<{ userId: string }>();
     const cart = useSelector((state: RootState) => (userId ? state.products.cart[userId] : []) || []);
@@ -31,11 +35,26 @@ const Cart = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+    const cartRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+                onClose();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [onClose]);
+
     const cartStyle = {
         width: isMobile ? '100%' : '400px',
         backgroundColor: 'white',
         padding: isMobile ? '10px' : '20px',
-        position: 'fixed',
+        position: 'fixed' as const,
         right: '0',
         top: '0',
         height: '100vh',
@@ -64,12 +83,18 @@ const Cart = () => {
         }
     };
 
+    const handleRemoveItem = (id: number) => {
+        if (userId) {
+            dispatch(removeItemFromCart({ productId: id, userId }));
+        }
+    };
+
     const handleApplyDiscount = () => {
         dispatch(applyDiscountCode(discountCode));
     };
 
     return (
-        <Box sx={cartStyle}>
+        <Box ref={cartRef} sx={cartStyle}>
             <Typography variant="h6">Cart ({cart.length})</Typography>
             {cart.map((item: Product) => (
                 <Box key={item.id} sx={cartItemStyle}>
@@ -81,7 +106,7 @@ const Cart = () => {
                         <Typography>{item.cartQuantity}</Typography>
                         <IconButton onClick={() => handleAdd(item.id)}><AddIcon /></IconButton>
                     </Box>
-                    <Button onClick={() => handleRemove(item.id)}>Remove</Button>
+                    <Button onClick={() => handleRemoveItem(item.id)}>Remove</Button>
                 </Box>
             ))}
             <TextField

@@ -226,6 +226,20 @@ const productsSlice = createSlice({
       }
     },
 
+    removeItemFromCart: (
+        state,
+        action: PayloadAction<{ productId: number; userId: string }>
+    ) => {
+      const { productId, userId } = action.payload;
+      const product = state.products.find((p) => p.id === productId);
+      if (product) {
+        product.inStockQuantity += product.cartQuantity;
+        product.cartQuantity = 0;
+        state.cart[userId] = state.cart[userId].filter(p => p.id !== productId);
+        localStorage.setItem('cart', JSON.stringify(state.cart));
+      }
+    },
+
     applyDiscountCode: (state, action: PayloadAction<string>) => {
       if (action.payload === '20DOLLAROFF') {
         Object.keys(state.cart).forEach(userId => {
@@ -271,6 +285,7 @@ export const {
   removeProduct,
   addToCart,
   removeFromCart,
+  removeItemFromCart,
   applyDiscountCode
 } = productsSlice.actions;
 export default productsSlice.reducer;
