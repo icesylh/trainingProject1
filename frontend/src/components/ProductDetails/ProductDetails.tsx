@@ -25,6 +25,10 @@ const detailOuterContainerBox = {
   gap: 2,
   width: '100%',
   maxWidth: '1323px',
+  height: '100%',
+  boxSizing: 'border-box' as const,
+  alignItems: 'center',
+  justifyContent: 'center'
 };
 
 const typoStyle = (isMobile: boolean) => ({
@@ -35,7 +39,7 @@ const typoStyle = (isMobile: boolean) => ({
 
 const imageStyle = {
   width: '100%',
-  height: '100%',
+  height: 'auto',
   borderRadius: '10px',
 };
 
@@ -76,16 +80,17 @@ const editButtonStyle = {
 
 const detailInnerContainerBox = (isMobile: boolean) => ({
   width: '100%',
-  maxWidth: isMobile ? '95%' : '1323px',
+  maxWidth: isMobile ? '80%' : '1323px',
   backgroundColor: '#FFFFFF',
   border: '1px solid #ccc',
   borderRadius: '4px',
-  px: isMobile ? 2 : 5,
+  justifyContent: 'center',
+  px: isMobile ? 2: 5,
   py: isMobile ? 2 : 5,
   boxShadow: 1,
   display: 'flex',
   flexDirection: isMobile ? 'column' : 'row',
-  alignItems: 'flex-start',
+  alignItems: 'center',
 });
 
 const imageContainerBox = (isMobile: boolean) => ({
