@@ -10,6 +10,7 @@ interface Product {
   inStockQuantity: number;
   cartQuantity: number;
   inStock: boolean;
+  discount: number;
 }
 
 interface ProductsState {
@@ -29,6 +30,7 @@ const initialState: ProductsState = {
       category: "Category1",
       description: "A powerful smartphone with 128GB of storage.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 2,
@@ -40,6 +42,7 @@ const initialState: ProductsState = {
       category: "Category2",
       description: "A high-end smartphone with advanced features.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 3,
@@ -51,6 +54,7 @@ const initialState: ProductsState = {
       category: "Category1",
       description: "A smartphone with pure Android experience.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 4,
@@ -62,6 +66,7 @@ const initialState: ProductsState = {
       category: "Category2",
       description: "A fast and smooth smartphone with great features.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 5,
@@ -73,6 +78,7 @@ const initialState: ProductsState = {
       category: "Category1",
       description: "A smartphone with professional-grade camera.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 6,
@@ -84,6 +90,7 @@ const initialState: ProductsState = {
       category: "Category2",
       description: "A compact and affordable iPhone with powerful features.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 7,
@@ -95,6 +102,7 @@ const initialState: ProductsState = {
       category: "Category1",
       description: "A smartphone with a built-in stylus for note-taking.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 8,
@@ -106,6 +114,7 @@ const initialState: ProductsState = {
       category: "Category2",
       description: "An affordable smartphone with great camera.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 9,
@@ -117,6 +126,7 @@ const initialState: ProductsState = {
       category: "Category1",
       description: "A budget-friendly smartphone with premium features.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 10,
@@ -128,6 +138,7 @@ const initialState: ProductsState = {
       category: "Category2",
       description: "A compact smartphone with powerful performance.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 11,
@@ -139,6 +150,7 @@ const initialState: ProductsState = {
       category: "Category1",
       description: "A latest-generation iPhone with advanced features.",
       inStock: true,
+      discount: 0,
     },
     {
       id: 12,
@@ -150,9 +162,10 @@ const initialState: ProductsState = {
       category: "Category1",
       description: "A mid-range smartphone with great performance.",
       inStock: true,
+      discount: 0,
     },
   ],
-  cart: {},
+  cart: JSON.parse(localStorage.getItem('cart') || '{}'),
 };
 
 interface AddToCartPayload {
@@ -186,12 +199,13 @@ const productsSlice = createSlice({
           cartProduct.cartQuantity = product.cartQuantity;
           cartProduct.inStockQuantity = product.inStockQuantity;
         }
+        localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
-    
+
     removeFromCart: (
-      state,
-      action: PayloadAction<{ productId: number; userId: string }>
+        state,
+        action: PayloadAction<{ productId: number; userId: string }>
     ) => {
       const { productId, userId } = action.payload;
       const product = state.products.find((p) => p.id === productId);
@@ -199,7 +213,7 @@ const productsSlice = createSlice({
         product.cartQuantity -= 1;
         product.inStockQuantity += 1;
         const cartProductIndex = state.cart[userId].findIndex(
-          (p) => p.id === productId
+            (p) => p.id === productId
         );
         if (cartProductIndex !== -1) {
           if (product.cartQuantity === 0) {
@@ -208,6 +222,18 @@ const productsSlice = createSlice({
             state.cart[userId][cartProductIndex] = { ...product };
           }
         }
+        localStorage.setItem('cart', JSON.stringify(state.cart));
+      }
+    },
+
+    applyDiscountCode: (state, action: PayloadAction<string>) => {
+      if (action.payload === '20DOLLAROFF') {
+        Object.keys(state.cart).forEach(userId => {
+          state.cart[userId].forEach(item => {
+            item.discount = 20;
+          });
+        });
+        localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
 
@@ -219,10 +245,10 @@ const productsSlice = createSlice({
       }
       state.cart[userId].push(product);
     },
-    
+
     updateProduct: (state, action: PayloadAction<Product>) => {
       const index = state.products.findIndex(
-        (product) => product.id === action.payload.id
+          (product) => product.id === action.payload.id
       );
       if (index !== -1) {
         state.products[index] = {
@@ -233,7 +259,7 @@ const productsSlice = createSlice({
     },
     removeProduct: (state, action: PayloadAction<number>) => {
       state.products = state.products.filter(
-        (product) => product.id !== action.payload
+          (product) => product.id !== action.payload
       );
     },
   },
@@ -245,5 +271,6 @@ export const {
   removeProduct,
   addToCart,
   removeFromCart,
+  applyDiscountCode
 } = productsSlice.actions;
 export default productsSlice.reducer;
