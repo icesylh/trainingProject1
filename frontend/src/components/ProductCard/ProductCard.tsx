@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Grid, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme, SelectChangeEvent } from '@mui/material';
 import { SingleProductCard } from '../../components/ProductCard/SingleProductCard';
 import { SortDropDown } from '../../components/ProductCard/SortDropDown';
 import { Pagination } from '../../components/ProductCard/Pagination';
-import { SelectChangeEvent } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { addToCart, removeFromCart } from '../../store/productsSlice';
@@ -23,7 +22,7 @@ const productsContainerStyle = (isMobile: boolean) => ({
   display: 'flex',
   flexDirection: isMobile ? 'column' : 'row',
   justifyContent: isMobile ? 'center' : 'space-between',
-  alignItems: isMobile ? 'center' : 'center',
+  alignItems: 'center',
   maxWidth: '1200px',
   mx: 'auto',
   width: '100%',
@@ -40,17 +39,28 @@ const productFontStyle = (isMobile: boolean) => ({
 
 const productsInnerContainerStyle = {
   width: '100%',
-  maxWidth: '1300px',
-  mx: 'auto',
+  maxWidth: '1450px',
   backgroundColor: '#FFFFFF',
   p: 4,
   boxShadow: 1,
   boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
 };
 
-const gridStyle = {
+const gridContainerStyle = {
   display: 'flex',
-  justifyContent: 'center',
+  justifyContent: 'space-around', 
+  alignItems: 'flex-start',
+  gap: '20px', 
+  flexWrap: 'wrap',
+};
+
+const gridItemStyle = {
+  flex: '1 1 calc(20% - 16px)', 
+  maxWidth: 'calc(20% - 16px)', 
+  boxSizing: 'border-box',
 };
 
 const paginationStyle = (isMobile: boolean) => ({
@@ -129,25 +139,24 @@ export const ProductCard = () => {
         </Box>
       </Box>
       <Box sx={productsInnerContainerStyle}>
-        <Grid container spacing={isMobile ? 3 : 5}>
+        <Box sx={gridContainerStyle}>
           {displayedProducts.map(product => (
-            <Grid item xs={12} sm={6} md={4} lg={2.4} key={product.id} sx={gridStyle}>
+            <Box key={product.id} sx={gridItemStyle}>
               <SingleProductCard
                 id={product.id}
                 imageUrl={product.imageUrl}
                 namee={product.name}
                 price={product.price}
                 cartQuantity={product.cartQuantity}
-                inStockQuantity={product.inStockQuantity}
                 onAdd={() => handleAdd(product.id)}
                 onRemove={() => handleRemove(product.id)}
                 onEdit={() => handleEdit(product.id)}
                 isAdmin={isAdmin}
                 inStock={product.inStock}
               />
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Box>
       <Box sx={paginationStyle(isMobile)}>
         <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />

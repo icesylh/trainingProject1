@@ -9,7 +9,6 @@ interface ProductCardProps {
   namee: string;
   price: number;
   cartQuantity: number;
-  inStockQuantity: number;
   onAdd: () => void;
   onRemove: () => void;
   onEdit: () => void;
@@ -20,14 +19,11 @@ interface ProductCardProps {
 const cardStyle = {
   border: '1px solid #ccc',
   borderRadius: '4px',
-  padding: '8px',
+  padding: '10px',
   width: '242px',
   height: '303px',
   display: 'flex',
   flexDirection: 'column' as const,
-  marginRight: '4px',
-  marginLeft: '4px',
-  textAlign: 'center' as const,
 };
 
 const imageStyle = {

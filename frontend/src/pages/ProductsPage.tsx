@@ -1,4 +1,3 @@
-// pages/ProductsPage.tsx
 import { Box } from '@mui/material';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import FakeHeader from '../components/Header/FakeHeader';

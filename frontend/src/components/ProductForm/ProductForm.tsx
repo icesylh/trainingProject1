@@ -8,7 +8,7 @@ const productFormContainerStyle = (isMobile: boolean) => ({
   alignItems: 'center',
   backgroundColor: '#F9F9F9',
   padding: isMobile ? 2 : 3,
-  width: isMobile ? '100%' : 'auto',
+  width: isMobile ? '90%' : 'auto',
 });
 
 const headerContainerStyle = (isMobile: boolean) => ({
