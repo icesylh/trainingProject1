@@ -1,10 +1,13 @@
-import { Box, Typography, Button, useMediaQuery, useTheme } from '@mui/material';
+// components/ProductDetails/ProductDetails.tsx
+import { Box, Typography, IconButton, Button, useMediaQuery, useTheme } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { CustomButton } from '../Button/CustomButton';
 import { StockTag } from './StockTag';
-import { addToCart } from '../../store/productsSlice';
+import { addToCart, removeFromCart } from '../../store/productsSlice';
 import { useNavigate } from 'react-router-dom';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 interface ProductDetailsProps {
   product: {
@@ -114,6 +117,20 @@ const buttonBoxStyle = (isMobile: boolean) => ({
   width: '100%',
 });
 
+const quantityContainerStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#5048E5',
+  borderRadius: '4px',
+  width: '110px',
+};
+
+const quantityTextStyle = {
+  color: 'white',
+  margin: '0 8px',
+};
+
 const priceContainer = {
   display: 'flex',
   alignItems: 'center',
@@ -129,43 +146,56 @@ export const ProductDetails = ({ product, userId }: ProductDetailsProps) => {
   const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const cartItem = useSelector((state: RootState) => state.products.cart[userId]?.find(item => item.id === product.id));
 
   const handleAddToCart = () => {
     dispatch(addToCart({ productId: product.id, userId }));
   };
 
+  const handleRemoveFromCart = () => {
+    dispatch(removeFromCart({ productId: product.id, userId }));
+  };
+
+
   const handleEdit = () => {
     navigate(`/user/${userId}/create-product/${product.id}`);
   };
 
-
   return (
-    <Box sx={detailOuterContainerBox}>
-      <Typography variant="h4" sx={typoStyle(isMobile)}>Products Detail</Typography>
-      <Box sx={detailInnerContainerBox(isMobile)}>
-        <Box sx={imageContainerBox(isMobile)}>
-          <img src={product.imageUrl} alt={product.name} style={imageStyle} />
-        </Box>
-        <Box sx={rightContentContainer(isMobile)}>
-          <Typography variant="subtitle1" sx={categoryStyle}>{product.category}</Typography>
-          <Typography variant="h4" sx={productStyle(isMobile)}>{product.name}</Typography>
-          <Box sx={priceContainer}>
-            <Typography variant="h5" sx={priceStyle(isMobile)}>
-              ${product.price}
-            </Typography>
-            <StockTag inStock={product.inStock} />
+      <Box sx={detailOuterContainerBox}>
+        <Typography variant="h4" sx={typoStyle(isMobile)}>Products Detail</Typography>
+        <Box sx={detailInnerContainerBox(isMobile)}>
+          <Box sx={imageContainerBox(isMobile)}>
+            <img src={product.imageUrl} alt={product.name} style={imageStyle} />
           </Box>
-          <Typography variant="body2" sx={descriptionStyle}>{product.description}</Typography>
-          <Box sx={buttonBoxStyle(isMobile)}>
-            <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={handleAddToCart} />
-            {isAdmin && (
-              <Button variant="outlined" sx={editButtonStyle} onClick={handleEdit}>
-                Edit
-              </Button>
-            )}
+          <Box sx={rightContentContainer(isMobile)}>
+            <Typography variant="subtitle1" sx={categoryStyle}>{product.category}</Typography>
+            <Typography variant="h4" sx={productStyle(isMobile)}>{product.name}</Typography>
+            <Box sx={priceContainer}>
+              <Typography variant="h5" sx={priceStyle(isMobile)}>
+                ${product.price}
+              </Typography>
+              <StockTag inStock={product.inStock} />
+            </Box>
+            <Typography variant="body2" sx={descriptionStyle}>{product.description}</Typography>
+            <Box sx={buttonBoxStyle(isMobile)}>
+              {cartItem ? (
+                  <Box sx={quantityContainerStyle}>
+                    <IconButton onClick={handleRemoveFromCart} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
+                    <Typography sx={quantityTextStyle}>{cartItem.cartQuantity}</Typography>
+                    <IconButton onClick={handleAddToCart} sx={{ color: 'white' }}><AddIcon /></IconButton>
+                  </Box>
+              ) : (
+                  <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={handleAddToCart} />
+              )}
+              {isAdmin && (
+                  <Button variant="outlined" sx={editButtonStyle} onClick={handleEdit}>
+                    Edit
+                  </Button>
+              )}
+            </Box>
           </Box>
         </Box>
       </Box>
-    </Box>
   );
 };
