@@ -49,19 +49,19 @@ const productsInnerContainerStyle = {
   justifyContent: 'space-between',
 };
 
-const gridContainerStyle = {
+const gridContainerStyle = (isMobile: boolean) => ({
   display: 'flex',
-  justifyContent: 'space-around', 
-  alignItems: 'flex-start',
-  gap: '20px', 
+  justifyContent: isMobile ? 'center' : 'space-around',
+  alignItems: 'center', 
+  gap: '20px',
   flexWrap: 'wrap',
-};
+});
 
-const gridItemStyle = {
-  flex: '1 1 calc(20% - 16px)', 
-  maxWidth: 'calc(20% - 16px)', 
+const gridItemStyle = (isMobile: boolean) => ({
+  flex: isMobile ? '0 1 auto' : '1 1 calc(20% - 16px)',
+  maxWidth: isMobile ? '100%' : 'calc(20% - 16px)',
   boxSizing: 'border-box',
-};
+});
 
 const paginationStyle = (isMobile: boolean) => ({
   display: 'flex',
@@ -139,9 +139,9 @@ export const ProductCard = () => {
         </Box>
       </Box>
       <Box sx={productsInnerContainerStyle}>
-        <Box sx={gridContainerStyle}>
+        <Box sx={gridContainerStyle(isMobile)}>
           {displayedProducts.map(product => (
-            <Box key={product.id} sx={gridItemStyle}>
+            <Box key={product.id} sx={gridItemStyle(isMobile)}>
               <SingleProductCard
                 id={product.id}
                 imageUrl={product.imageUrl}
