@@ -16,6 +16,7 @@ interface Product {
 interface ProductsState {
   products: Product[];
   cart: { [key: string]: Product[] };
+  discountCode: string | null;
 }
 
 const initialState: ProductsState = {
@@ -166,7 +167,9 @@ const initialState: ProductsState = {
     },
   ],
   cart: JSON.parse(localStorage.getItem('cart') || '{}'),
+  discountCode: null,
 };
+
 
 interface AddToCartPayload {
   productId: number;
@@ -176,6 +179,10 @@ interface AddToCartPayload {
 interface AddProductPayload extends Product {
   userId: string;
 }
+
+const discountCodes: { [key: string]: number } = {
+  '20DOLLAROFF': 20,
+};
 
 const productsSlice = createSlice({
   name: "products",
@@ -194,12 +201,13 @@ const productsSlice = createSlice({
 
         const cartProduct = state.cart[userId].find((p) => p.id === product.id);
         if (!cartProduct) {
-          state.cart[userId].push({ ...product });
+          const discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
+          state.cart[userId].push({ ...product, discount });
         } else {
           cartProduct.cartQuantity = product.cartQuantity;
           cartProduct.inStockQuantity = product.inStockQuantity;
+          cartProduct.discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
         }
-        localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
 
@@ -241,15 +249,28 @@ const productsSlice = createSlice({
     },
 
     applyDiscountCode: (state, action: PayloadAction<string>) => {
-      if (action.payload === '20DOLLAROFF') {
+      const code = action.payload;
+      const discountAmount = discountCodes[code];
+      if (discountAmount) {
+        state.discountCode = code;
         Object.keys(state.cart).forEach(userId => {
           state.cart[userId].forEach(item => {
-            item.discount = 20;
+            item.discount = discountAmount;
           });
         });
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
+    removeDiscountCode: (state) => {
+      state.discountCode = null;
+      Object.keys(state.cart).forEach(userId => {
+        state.cart[userId].forEach(item => {
+          item.discount = 0;
+        });
+      });
+      localStorage.setItem('cart', JSON.stringify(state.cart));
+    },
+
 
     addProduct: (state, action: PayloadAction<AddProductPayload>) => {
       const { userId, ...product } = action.payload;
@@ -286,6 +307,7 @@ export const {
   addToCart,
   removeFromCart,
   removeItemFromCart,
-  applyDiscountCode
+  applyDiscountCode,
+  removeDiscountCode
 } = productsSlice.actions;
 export default productsSlice.reducer;
