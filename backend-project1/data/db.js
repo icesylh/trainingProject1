@@ -1,0 +1,13 @@
+const mongoose = require("mongoose");
+mongoose.connect("mongodb+srv://liyux:chuwaBestTeam@recipe.mqzojkr.mongodb.net/ChuwaProject1", {
+  useCreateIndex: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+});
+mongoose.connection.on("connected", res => {
+  console.log("connected");
+});
+mongoose.connection.on("error", err => {
+  console.log("Mongoose connection error: " + err);
+});
