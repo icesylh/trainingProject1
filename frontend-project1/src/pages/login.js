@@ -1,16 +1,30 @@
 import React, { useState } from 'react'
-import { Button, Form, Input, Radio } from 'antd'
+import { Button, Form, Input, message } from 'antd'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { CloseOutlined } from '@ant-design/icons'
 import { useHistory, Link } from 'react-router-dom'
-
+import axios from 'axios'
 const Login = () => {
   const [form] = Form.useForm()
   const history = useHistory()
 
-  const onFinish = () => {
-    history.push('/user/:usrId/products')
+  const onFinish = ({ email, password }) => {
+    axios
+      .post('http://localhost:8088/Login', {
+        account: email,
+        password: password
+      })
+      .then((res) => {
+        if (res.data.Code === 200) {
+          message.success(res.data.Msg)
+          setTimeout(() => {
+            history.push(`/user/${email}/products`)
+          }, 1000)
+        } else {
+          message.error(res.data.Msg)
+        }
+      })
   }
   return (
     <div className="container">
