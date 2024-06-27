@@ -7,7 +7,6 @@ const generateObjectIdFromEmail = (email) => {
   return new mongoose.Types.ObjectId(hash.substring(0, 24)); 
 };
 
-
 exports.createProduct = async (req, res, next) => {
   try {
     const { name, description, category, price, quantity, image, userEmail } = req.body;
@@ -52,19 +51,15 @@ exports.getProductsByUserId = async (req, res, next) => {
   }
 };
 
-exports.updateProduct = async (req, res) => {
+exports.updateProduct = async (req, res, next) => {
   const { productId } = req.params;
   const productData = req.body;
 
   try {
-    const user = await User.findOne({ email: productData.seller });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
     const product = await Product.findOneAndUpdate(
       { id1: productId },
-      { ...productData, seller: user._id },
-      { new: true }
+      productData,
+      { new: true, omitUndefined: true }
     );
 
     if (!product) {
@@ -73,7 +68,8 @@ exports.updateProduct = async (req, res) => {
 
     res.json(product);
   } catch (error) {
-    next(error);
+    console.error('Error updating product:', error);
+    next(error); 
   }
 };
 
