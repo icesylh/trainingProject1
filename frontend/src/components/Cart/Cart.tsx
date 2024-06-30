@@ -232,7 +232,7 @@ const Cart = ({ onClose }: CartProps) => {
                 <Divider sx={{ my: 2 }} />
                 <Box sx={discountContainerStyle}>
                     <TextField
-                        label="Apply Discount Code"
+                        label="Please Apply Discount Code"
                         value={discountCode}
                         onChange={(e) => setDiscountCode(e.target.value)}
                         fullWidth
