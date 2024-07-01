@@ -12,7 +12,7 @@ const transPort = nodemailder.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
   auth: {
-    pass: 'dbtxtbxrfipceyej',
+    pass: 'nkrqfarqabvhosem',
     user: 'icesylh@gmail.com'
   },
   secure: false // 加密发送
@@ -82,3 +82,7 @@ router.post('/forgot', (req, res) => {
     }
   })
 })
+
+
+
+
