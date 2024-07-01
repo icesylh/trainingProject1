@@ -1,20 +1,21 @@
 import React, { useState } from 'react'
-import { Button, Form, Input, message } from 'antd'
+import { Button, Form, Input, message, Select } from 'antd'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { CloseOutlined } from '@ant-design/icons'
 import { useHistory, Link } from 'react-router-dom'
 import axios from 'axios'
-
+const { Option } = Select
 const Regsiter = () => {
   const [form] = Form.useForm()
   const history = useHistory()
 
-  const onFinish = ({ password, email }) => {
+  const onFinish = ({ password, email, type }) => {
     axios
       .post('http://localhost:8088/User/Register', {
         account: email,
-        password: password
+        password: password,
+        type
       })
       .then((res) => {
         if (res.data.Code === 200) {
@@ -54,6 +55,17 @@ const Regsiter = () => {
           >
             <Input placeholder="input Password" type="password" />
           </Form.Item>
+          <Form.Item
+            label="Type"
+            name="type"
+            rules={[{ required: true, message: 'Please Select your type!' }]}
+          >
+            <Select placeholder="Select type">
+              <Option value="1">admin</Option>
+              <Option value="2">user</Option>
+            </Select>
+          </Form.Item>
+
           <Form.Item>
             <Button type="primary" block htmlType="submit">
               Create account

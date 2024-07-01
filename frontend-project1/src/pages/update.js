@@ -12,14 +12,14 @@ const Update = () => {
 
   const onFinish = ({ email }) => {
     axios
-      .post('http://localhost:8088/Forgot', {
+      .post('http://localhost:8088/User/sendCode', {
         account: email
       })
       .then((res) => {
         if (res.data.Code === 200) {
           message.success(res.data.Msg)
           setTimeout(() => {
-            history.push('/end')
+            history.push('/send')
           }, 1000)
         } else {
           message.error(res.data.Msg)

@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import { CloseOutlined } from '@ant-design/icons'
 import { useHistory, Link } from 'react-router-dom'
 import axios from 'axios'
+
 const Login = () => {
   const [form] = Form.useForm()
   const history = useHistory()
@@ -18,8 +19,12 @@ const Login = () => {
       .then((res) => {
         if (res.data.Code === 200) {
           message.success(res.data.Msg)
+          localStorage.setItem('token', email)
+
           setTimeout(() => {
-            history.push(`/user/${email}/products`)
+            history.push(
+              `/user/${res.data.data.name}/${res.data.Token}/products`
+            )
           }, 1000)
         } else {
           message.error(res.data.Msg)

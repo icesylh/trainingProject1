@@ -15,8 +15,13 @@ router.post('/', (req, res) => {
       if (compare) {
         let Token = jwt.encrypt(String(doc._id))
 
-        res.send({ Code: 200, Msg: '登录成功', Token, data: doc.name })
-      } else res.send({ Code: 500, Msg: '密码错误' })
-    } else res.send({ Code: 500, Msg: '账号不存在' })
+        res.send({
+          Code: 200,
+          Msg: 'Login Successful',
+          Token,
+          data: { name: doc.name, type: doc.type }
+        })
+      } else res.send({ Code: 500, Msg: 'incorrect password' })
+    } else res.send({ Code: 500, Msg: 'Account does not exist' })
   })
 })
