@@ -5,8 +5,8 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useState } from 'react';
 
 interface ProductCardProps {
-  id: number;
-  imageUrl: string;
+  id1: string;
+  image: string;
   namee: string;
   price: number;
   cartQuantity: number;
@@ -105,8 +105,8 @@ const quantityTextStyle = {
 };
 
 export const SingleProductCard = ({
-  id,
-  imageUrl,
+  id1,
+  image,
   namee,
   price,
   cartQuantity,
@@ -121,7 +121,7 @@ export const SingleProductCard = ({
 
   const handleCardClick = () => {
     if (userId) {
-      navigate(`/user/${userId}/product/${id}`);
+      navigate(`/user/${userId}/product/${id1}`);
     }
   };
 
@@ -143,7 +143,7 @@ export const SingleProductCard = ({
 
   return (
     <Box sx={cardStyle}>
-      <img src={imageUrl} alt={namee} style={imageStyle} onClick={handleCardClick} />
+      <img src={image} alt={namee} style={imageStyle} onClick={handleCardClick} />
       <Typography variant="body2" sx={nameTextStyle}>{namee}</Typography>
       <Typography variant="body1" sx={priceTextStyle}>${formattedPrice}</Typography>
       {

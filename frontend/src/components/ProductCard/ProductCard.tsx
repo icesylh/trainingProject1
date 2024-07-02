@@ -149,8 +149,8 @@ export const ProductCard = () => {
           {displayedProducts.map((product) => (
             <Box key={product.id} sx={gridItemStyle(isMobile)}>
               <SingleProductCard
-                id={product.id}
-                imageUrl={product.imageUrl ?? ''}
+                id1={product.id1|| ""}
+                image={product.image ?? ''}
                 namee={product.name}
                 price={product.price}
                 cartQuantity={product.cartQuantity}

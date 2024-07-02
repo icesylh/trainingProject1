@@ -1,26 +1,14 @@
-import { Box, Typography, IconButton, Button, useMediaQuery, useTheme } from '@mui/material';
+import {Box, Typography, Button, useMediaQuery, useTheme, IconButton} from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { CustomButton } from '../Button/CustomButton';
 import { StockTag } from './StockTag';
-import { addToCart, removeFromCart, fetchProductById } from '../../store/productsSlice';
+import { fetchProductById } from '../../store/productsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
 import { useEffect } from 'react';
-
-interface ProductDetailsProps {
-  product: {
-    id: number;
-    imageUrl: string;
-    name: string;
-    category: string;
-    price: number;
-    description: string;
-    inStock: boolean;
-  };
-  userId: string;
-}
+import { addToCart, removeFromCart } from '../../store/productsSlice';
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
 
 const detailOuterContainerBox = {
   display: 'flex',
@@ -36,7 +24,7 @@ const detailOuterContainerBox = {
 const typoStyle = (isMobile: boolean) => ({
   fontWeight: 'bold',
   textAlign: 'left',
-  alignSelf: isMobile ? 'center' : 'flex-start'
+  alignSelf: isMobile ? 'center' : 'flex-start',
 });
 
 const imageStyle = {
@@ -139,22 +127,37 @@ const priceContainer = {
   gap: '8px',
 };
 
-export const ProductDetails = ({ product, userId }: ProductDetailsProps) => {
+export const ProductDetails = ({ userId }: { userId: string }) => {
   const theme = useTheme();
+  const { id } = useParams<{ id: string }>() ?? { id: '' };
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
+  const isAdmin = useSelector((state: RootState) => state.user.isAdmin) as boolean;
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+
+  const product = useSelector((state: RootState) =>
+      id ? state.products.products.find(p => p.id1 === id) : null
+  );
+
+  // @ts-ignore
   const cartItem = useSelector((state: RootState) => state.products.cart[userId]?.find(item => item.id === product.id));
 
   useEffect(() => {
-    if (!product) {
-      const { id } = useParams<{ id: string }>();
-      if (id) {
-        dispatch(fetchProductById(id));
-      }
+    if (id && !product) {
+      dispatch(fetchProductById(id));
     }
-  }, [product, dispatch]);
+  }, [id, dispatch, product]);
+
+
+  const handleEdit = () => {
+    if (product) {
+      navigate(`/user/${userId}/create-product/${product.id1}`);
+    }
+  };
+
+  if (!product) {
+    return <Typography>Loading...</Typography>;
+  }
 
   const handleAddToCart = () => {
     dispatch(addToCart({ productId: product.id, userId }));
@@ -164,45 +167,44 @@ export const ProductDetails = ({ product, userId }: ProductDetailsProps) => {
     dispatch(removeFromCart({ productId: product.id, userId }));
   };
 
-  const handleEdit = () => {
-    navigate(`/user/${userId}/create-product/${product.id}`);
-  };
-
   return (
-    <Box sx={detailOuterContainerBox}>
-      <Typography variant="h4" sx={typoStyle(isMobile)}>Products Detail</Typography>
-      <Box sx={detailInnerContainerBox(isMobile)}>
-        <Box sx={imageContainerBox(isMobile)}>
-          <img src={product.imageUrl} alt={product.name} style={imageStyle} />
-        </Box>
-        <Box sx={rightContentContainer(isMobile)}>
-          <Typography variant="subtitle1" sx={categoryStyle}>{product.category}</Typography>
-          <Typography variant="h4" sx={productStyle(isMobile)}>{product.name}</Typography>
-          <Box sx={priceContainer}>
-            <Typography variant="h5" sx={priceStyle(isMobile)}>
-              ${product.price}
-            </Typography>
-            <StockTag inStock={product.inStock} />
+      <Box sx={detailOuterContainerBox}>
+        <Typography variant="h4" sx={typoStyle(isMobile)}>Products Detail</Typography>
+        <Box sx={detailInnerContainerBox(isMobile)}>
+          <Box sx={imageContainerBox(isMobile)}>
+            <img src={product.image} alt={product.name} style={imageStyle} />
           </Box>
-          <Typography variant="body2" sx={descriptionStyle}>{product.description}</Typography>
-          <Box sx={buttonBoxStyle(isMobile)}>
-            {cartItem ? (
-              <Box sx={quantityContainerStyle}>
-                <IconButton onClick={handleRemoveFromCart} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
-                <Typography sx={quantityTextStyle}>{cartItem.cartQuantity}</Typography>
-                <IconButton onClick={handleAddToCart} sx={{ color: 'white' }}><AddIcon /></IconButton>
-              </Box>
-            ) : (
-              <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={handleAddToCart} />
-            )}
-            {isAdmin && (
-              <Button variant="outlined" sx={editButtonStyle} onClick={handleEdit}>
-                Edit
-              </Button>
-            )}
+          <Box sx={rightContentContainer(isMobile)}>
+            <Typography variant="subtitle1" sx={categoryStyle}>{product.category}</Typography>
+            <Typography variant="h4" sx={productStyle(isMobile)}>{product.name}</Typography>
+            <Box sx={priceContainer}>
+              <Typography variant="h5" sx={priceStyle(isMobile)}>
+                ${product.price}
+              </Typography>
+              <StockTag inStock={product.inStock} />
+            </Box>
+            <Typography variant="body2" sx={descriptionStyle}>{product.description}</Typography>
+
+            <Box sx={buttonBoxStyle(isMobile)}>
+              {cartItem ? (
+                  <Box sx={quantityContainerStyle}>
+                    <IconButton onClick={handleRemoveFromCart} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
+                    <Typography sx={quantityTextStyle}>{cartItem.cartQuantity}</Typography>
+                    <IconButton onClick={handleAddToCart} sx={{ color: 'white' }}><AddIcon /></IconButton>
+                  </Box>
+              ) : (
+                  <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={handleAddToCart} />
+              )}
+
+
+              {isAdmin && (
+                  <Button variant="outlined" sx={editButtonStyle} onClick={handleEdit}>
+                    Edit
+                  </Button>
+              )}
+            </Box>
           </Box>
         </Box>
       </Box>
-    </Box>
   );
 };

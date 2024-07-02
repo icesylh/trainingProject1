@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { ProductCard } from '../components/ProductCard/ProductCard';
-import FakeHeader from '../components/Header/FakeHeader';
-import FakeFooter from '../components/Header/FakeFooter';
+import Header from '../components/Header'; // Ensure this imports the correct Header component you want to use
+import Footer from '../components/Footer'; // Ensure this imports the correct Footer component you provided
 import Cart from '../components/Cart/Cart';
 import CartIcon from '../components/Cart/CartIcon';
 import { useState } from 'react';
@@ -34,17 +34,17 @@ const ProductsPage = () => {
   };
 
   return (
-    <>
-      <Box sx={headerStyle}>
-        <FakeHeader />
-        {userId && <CartIcon onClick={toggleCart} userId={userId} />}
-      </Box>
-      <Box sx={outContainerStyle}>
-        <ProductCard />
-      </Box>
-      {isCartOpen && <Cart onClose={toggleCart} />}
-      <FakeFooter />
-    </>
+      <>
+        <Box sx={headerStyle}>
+          <Header />
+          {userId && <CartIcon onClick={toggleCart} userId={userId} />}
+        </Box>
+        <Box sx={outContainerStyle}>
+          <ProductCard />
+        </Box>
+        {isCartOpen && <Cart onClose={toggleCart} />}
+        <Footer />
+      </>
   );
 };
 

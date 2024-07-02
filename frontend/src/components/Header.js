@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { ShoppingCartOutlined, UserOutlined } from '@ant-design/icons'
+import { UserOutlined } from '@ant-design/icons'
 import { Input } from 'antd'
 
-const Footer = () => {
+const Header = () => {
   const { Search } = Input
 
   return (
@@ -21,10 +21,6 @@ const Footer = () => {
             <UserOutlined style={{ fontSize: 20, marginRight: 10 }} />
             <span className="item-name"> Sign in</span>
           </div>
-          <div className="right-item">
-            <ShoppingCartOutlined style={{ fontSize: 20, marginRight: 10 }} />
-            <span className="item-name"> $0.00</span>
-          </div>
         </div>
       </div>
       <div className="mobile">
@@ -33,4 +29,4 @@ const Footer = () => {
     </div>
   )
 }
-export default Footer
+export default Header
