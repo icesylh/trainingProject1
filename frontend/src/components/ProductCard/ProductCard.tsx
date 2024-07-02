@@ -52,7 +52,7 @@ const productsInnerContainerStyle = {
 const gridContainerStyle = (isMobile: boolean) => ({
   display: 'flex',
   justifyContent: isMobile ? 'center' : 'space-around',
-  alignItems: 'center', 
+  alignItems: 'center',
   gap: '20px',
   flexWrap: 'wrap',
 });
@@ -79,7 +79,7 @@ export const ProductCard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
   const products = useSelector((state: RootState) => state.products.products);
-  const dispatch = useDispatch<AppDispatch>(); 
+  const dispatch = useDispatch<AppDispatch>();
 
   const [sort, setSort] = useState('lastAdded');
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,12 +89,9 @@ export const ProductCard = () => {
 
   useEffect(() => {
     if (userId) {
-      dispatch(fetchProducts(userId)); 
+      dispatch(fetchProducts(userId));
     }
   }, [dispatch, userId]);
-
-  useEffect(() => {
-  }, [products]);
 
   useEffect(() => {
     handleSortChange({ target: { value: sort } } as SelectChangeEvent<string>);
@@ -110,7 +107,7 @@ export const ProductCard = () => {
     } else if (sort === 'priceHighToLow') {
       return b.price - a.price;
     } else {
-      return b.id - a.id; 
+      return b.id - a.id;
     }
   });
 
@@ -118,20 +115,19 @@ export const ProductCard = () => {
     setCurrentPage(page);
   };
 
-  const handleAdd = (id1: string) => {
-    console.log('Add button clicked for product:', id1);
-    dispatch(addToCart({ productId: id1, userId: userId! }));
+  const handleAdd = (id: number) => {
+    dispatch(addToCart({ productId: id, userId: userId! }));
   };
 
-  const handleRemove = (id1: string) => {
-    dispatch(removeFromCart({ productId: id1, userId: userId! }));
+  const handleRemove = (id: number) => {
+    dispatch(removeFromCart({ productId: id, userId: userId! }));
   };
 
   const handleAddProduct = () => {
     navigate(`/user/${userId}/create-product`);
   };
 
-  const handleEdit = (productId: string) => {
+  const handleEdit = (productId: number) => {
     navigate(`/user/${userId}/create-product/${productId}`);
   };
 
@@ -151,19 +147,18 @@ export const ProductCard = () => {
       <Box sx={productsInnerContainerStyle}>
         <Box sx={gridContainerStyle(isMobile)}>
           {displayedProducts.map((product) => (
-            <Box key={product.id1 || product.id} sx={gridItemStyle(isMobile)}>
+            <Box key={product.id} sx={gridItemStyle(isMobile)}>
               <SingleProductCard
                 id={product.id}
-                id1={product.id1 || ""}
-                image={product.image}
+                imageUrl={product.imageUrl}
                 namee={product.name}
                 price={product.price}
-                initialCartQuantity={product.cartQuantity}
-                onAdd={() => handleAdd(product.id1 || "")}
-                onRemove={() => handleRemove(product.id1 || "")}
-                onEdit={() => handleEdit(product.id1 || "")}
+                cartQuantity={product.cartQuantity}
+                onAdd={() => handleAdd(product.id)}
+                onRemove={() => handleRemove(product.id)}
+                onEdit={() => handleEdit(product.id)}
                 isAdmin={isAdmin}
-                inStock={product.quantity > 0}
+                inStock={product.inStock}
               />
             </Box>
           ))}

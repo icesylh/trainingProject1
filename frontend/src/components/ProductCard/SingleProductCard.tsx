@@ -1,16 +1,15 @@
 import { Box, Typography, Button, IconButton, SvgIcon } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useState } from 'react';
 
 interface ProductCardProps {
   id: number;
-  id1: string;
-  image: string;
+  imageUrl: string;
   namee: string;
   price: number;
-  initialCartQuantity: number;  // 初始购物车数量
+  cartQuantity: number;
   onAdd: () => void;
   onRemove: () => void;
   onEdit: () => void;
@@ -107,33 +106,30 @@ const quantityTextStyle = {
 
 export const SingleProductCard = ({
   id,
-  id1, 
-  image,
+  imageUrl,
   namee,
   price,
-  initialCartQuantity,
+  cartQuantity,
   onAdd,
   onRemove,
   onEdit,
   isAdmin,
   inStock,
 }: ProductCardProps) => {
-  const [cartQuantity, setCartQuantity] = useState(initialCartQuantity);
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
 
   const handleCardClick = () => {
     if (userId) {
-      navigate(`/user/${userId}/product/${id1}`);
+      navigate(`/user/${userId}/product/${id}`);
     }
   };
-  
+
   const formattedPrice = price ? price.toFixed(2) : '0.00';
 
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // 防止事件冒泡
     if (inStock) {
-      setCartQuantity(cartQuantity + 1);
       onAdd();
     }
   };
@@ -141,14 +137,13 @@ export const SingleProductCard = ({
   const handleRemoveClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // 防止事件冒泡
     if (cartQuantity > 0) {
-      setCartQuantity(cartQuantity - 1);
       onRemove();
     }
   };
 
   return (
     <Box sx={cardStyle}>
-      <img src={image} alt={namee} style={imageStyle} onClick={handleCardClick} />
+      <img src={imageUrl} alt={namee} style={imageStyle} onClick={handleCardClick} />
       <Typography variant="body2" sx={nameTextStyle}>{namee}</Typography>
       <Typography variant="body1" sx={priceTextStyle}>${formattedPrice}</Typography>
       {

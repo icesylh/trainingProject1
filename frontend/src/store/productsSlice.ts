@@ -4,30 +4,34 @@ import axios from 'axios';
 interface Product {
   id: number;
   id1?: string;
-  image: string;
+  image?: string;
+  imageUrl?: string;
   name: string;
   price: number;
   category: string;
   description: string;
-  quantity: number;
+  quantity?: number;
+  inStockQuantity?: number;
   cartQuantity: number;
   inStock: boolean;
   discount: number;
-  seller: string;
+  seller?: string;
 }
 
 interface ProductsState {
   products: Product[];
   cart: { [key: string]: Product[] };
+  discountCode: string | null;
 }
 
 const initialState: ProductsState = {
   products: [],
   cart: JSON.parse(localStorage.getItem('cart') || '{}'),
+  discountCode: null,
 };
 
 const api = axios.create({
-  baseURL: 'http://localhost:8088', 
+  baseURL: 'http://localhost:8088',
 });
 
 // Fetch products by user
@@ -36,7 +40,8 @@ export const fetchProducts = createAsyncThunk('products/fetchProducts', async (u
     const response = await api.get(`/api/products/user/${username}/products`);
     return response.data.map((product: any) => ({
       ...product,
-      quantity: product.quantity, 
+      quantity: product.quantity,
+      inStockQuantity: product.quantity,
       cartQuantity: 0, // Ensure cartQuantity is initialized
       inStock: product.quantity > 0 // Determine if the product is in stock
     }));
@@ -102,8 +107,6 @@ export const updateProduct = createAsyncThunk(
   }
 );
 
-
-
 // Remove product
 export const removeProduct = createAsyncThunk('products/removeProduct', async (productId: string, { rejectWithValue }) => {
   try {
@@ -119,9 +122,13 @@ export const removeProduct = createAsyncThunk('products/removeProduct', async (p
 });
 
 interface AddToCartPayload {
-  productId: string;
+  productId: string | number;
   userId: string;
 }
+
+const discountCodes: { [key: string]: number } = {
+  '20DOLLAROFF': 20,
+};
 
 const productsSlice = createSlice({
   name: "products",
@@ -129,36 +136,38 @@ const productsSlice = createSlice({
   reducers: {
     addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId);
-      if (product && product.quantity > 0) {
+      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
+      if (product && (product.quantity || product.inStockQuantity) && (product.quantity! > 0 || product.inStockQuantity! > 0)) {
         product.cartQuantity += 1;
-        product.quantity -= 1;
+        product.quantity !== undefined ? product.quantity -= 1 : product.inStockQuantity! -= 1;
 
         if (!state.cart[userId]) {
           state.cart[userId] = [];
         }
 
-        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1);
+        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1 || p.id === product.id);
         if (!cartProduct) {
-          state.cart[userId].push({ ...product });
+          const discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
+          state.cart[userId].push({ ...product, discount });
         } else {
           cartProduct.cartQuantity = product.cartQuantity;
-          cartProduct.quantity = product.quantity;
+          cartProduct.quantity !== undefined ? cartProduct.quantity = product.quantity : cartProduct.inStockQuantity = product.inStockQuantity;
+          cartProduct.discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
         }
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
     removeFromCart: (
       state,
-      action: PayloadAction<{ productId: string; userId: string }>
+      action: PayloadAction<{ productId: string | number; userId: string }>
     ) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId);
+      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
       if (product && product.cartQuantity > 0) {
         product.cartQuantity -= 1;
-        product.quantity += 1;
+        product.quantity !== undefined ? product.quantity += 1 : product.inStockQuantity! += 1;
         const cartProductIndex = state.cart[userId].findIndex(
-          (p) => p.id1 === productId
+          (p) => p.id1 === productId || p.id === productId
         );
         if (cartProductIndex !== -1) {
           if (product.cartQuantity === 0) {
@@ -172,26 +181,38 @@ const productsSlice = createSlice({
     },
     removeItemFromCart: (
       state,
-      action: PayloadAction<{ productId: string; userId: string }>
+      action: PayloadAction<{ productId: string | number; userId: string }>
     ) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId);
+      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
       if (product) {
-        product.quantity += product.cartQuantity;
+        product.quantity !== undefined ? product.quantity += product.cartQuantity : product.inStockQuantity! += product.cartQuantity;
         product.cartQuantity = 0;
-        state.cart[userId] = state.cart[userId].filter((p) => p.id1 !== productId);
+        state.cart[userId] = state.cart[userId].filter((p) => p.id1 !== productId && p.id !== productId);
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
     applyDiscountCode: (state, action: PayloadAction<string>) => {
-      if (action.payload === '20DOLLAROFF') {
+      const code = action.payload;
+      const discountAmount = discountCodes[code];
+      if (discountAmount) {
+        state.discountCode = code;
         Object.keys(state.cart).forEach((userId) => {
           state.cart[userId].forEach((item) => {
-            item.discount = 20;
+            item.discount = discountAmount;
           });
         });
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
+    },
+    removeDiscountCode: (state) => {
+      state.discountCode = null;
+      Object.keys(state.cart).forEach(userId => {
+        state.cart[userId].forEach(item => {
+          item.discount = 0;
+        });
+      });
+      localStorage.setItem('cart', JSON.stringify(state.cart));
     },
   },
   extraReducers: (builder) => {
@@ -204,13 +225,13 @@ const productsSlice = createSlice({
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
         const updatedProduct = action.payload;
-        const existingProduct = state.products.find(product => product.id1 === updatedProduct.id1);
+        const existingProduct = state.products.find(product => product.id1 === updatedProduct.id1 || product.id === updatedProduct.id);
         if (existingProduct) {
           Object.assign(existingProduct, updatedProduct);
         }
       })
       .addCase(removeProduct.fulfilled, (state, action: PayloadAction<string>) => {
-        state.products = state.products.filter((product) => product.id1 !== action.payload);
+        state.products = state.products.filter((product) => product.id1 !== action.payload && product.id !== action.payload);
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         const index = state.products.findIndex(product => product.id === action.payload.id);
@@ -219,7 +240,7 @@ const productsSlice = createSlice({
         } else {
           state.products.push(action.payload);
         }
-      })
+      });
   }
 });
 
@@ -227,7 +248,8 @@ export const {
   addToCart,
   removeFromCart,
   removeItemFromCart,
-  applyDiscountCode
+  applyDiscountCode,
+  removeDiscountCode,
 } = productsSlice.actions;
 
 export default productsSlice.reducer;

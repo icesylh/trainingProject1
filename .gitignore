@@ -1,3 +1,7 @@
 
 .DS_Store
 /.idea
+frontend/.idea/frontend.iml
+frontend/.idea/inspectionProfiles/Project_Default.xml
+frontend/.idea/modules.xml
+frontend/.idea/vcs.xml

@@ -1,6 +1,6 @@
 import { Box, Button, TextField, Typography, Select, MenuItem, FormControl, FormLabel, InputAdornment } from '@mui/material';
-import { ReactComponent as ImagePreviewIcon } from './imagePreview.svg';
-import { addProduct, updateProduct, removeProduct, fetchProductById } from '../../store/productsSlice'; 
+import { ReactComponent as ImagePreviewIcon } from '../../assets/imagePreview.svg';
+import { addProduct, updateProduct, removeProduct, fetchProductById } from '../../store/productsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
@@ -113,7 +113,7 @@ const schema = yup.object().shape({
   description: yup.string().required('Product description is required').min(10, 'Product description must be at least 10 characters').max(100, 'Product description must be less than 100 characters'),
   category: yup.string().required('Category is required'),
   price: yup.number().required('Price is required').min(0, 'Price must be a positive number'),
-  quantity: yup.number().required('In Stock Quantity is required').min(0, 'In Stock Quantity must be a positive number'),
+  inStockQuantity: yup.number().required('In Stock Quantity is required').min(0, 'In Stock Quantity must be a positive number'),
   imageUrl: yup.string().test('is-url-or-base64', 'Image URL must be a valid URL', (value) => {
     const urlPattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/gm;
     const base64Pattern = /^data:image\/[a-zA-Z]+;base64,[^\s]+$/gm;
@@ -139,11 +139,10 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
 
   const imageUrl = watch('imageUrl', 'http://');
   const product = useSelector((state: RootState) =>
-    id ? state.products.products.find(p => p.id1 === id) : null
+    id ? state.products.products.find(p => p.id === Number(id)) : null
   );
 
   useEffect(() => {
-    console.log('Image URL changed:', imageUrl);
     if (imageUrl && imageUrl !== 'http://') {
       setImagePreview(imageUrl);
     } else {
@@ -152,56 +151,46 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
   }, [imageUrl]);
 
   useEffect(() => {
-    console.log('Fetching product by ID:', id);
     if (id && !product) {
       dispatch(fetchProductById(id));
     }
   }, [dispatch, id, product]);
 
   useEffect(() => {
-    console.log('Product found:', product);
     if (product) {
       setValue('name', product.name);
       setValue('description', product.description);
       setValue('category', product.category);
       setValue('price', product.price);
-      setValue('quantity', product.quantity);
-      setValue('imageUrl', product.image);
-      setImagePreview(product.image);
+      setValue('inStockQuantity', product.inStockQuantity);
+      setValue('imageUrl', product.imageUrl);
+      setImagePreview(product.imageUrl);
     }
   }, [product, setValue]);
 
   const onSubmit = async (data: any) => {
-    console.log('Submitting data:', data); 
     if (userId) {
       const newProduct = {
         ...data,
-        id1: product ? product.id1 : Date.now(), // 这里使用 id1 作为产品 ID
-        inStock: data.quantity > 0,
-        image: data.imageUrl,
-        userEmail: userId 
+        id: product ? product.id : Date.now(),
+        inStock: data.inStockQuantity > 0,
+        cartQuantity: 0,
       };
-  
-      console.log('New Product Data:', newProduct);
-  
+
       if (product) {
-        console.log('Updating product with ID:', product.id1);
-        await dispatch(updateProduct({ product: newProduct })); // 传递 userId 和 product
+        await dispatch(updateProduct({ ...newProduct, userId }));
       } else {
-        console.log('Adding new product');
-        await dispatch(addProduct(newProduct));
+        await dispatch(addProduct({ ...newProduct, userId }));
       }
       navigate(`/user/${userId}/products`);
     } else {
       console.error('User ID is missing');
     }
   };
-  
-  
 
   const handleDelete = async () => {
     if (productId) {
-      await dispatch(removeProduct(productId));
+      await dispatch(removeProduct(Number(productId)));
       navigate(`/user/${userId}/products`);
     } else {
       console.error('Product ID is missing');
@@ -228,7 +217,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="name"
             control={control}
-            render={({ field }: { field: any }) => <TextField {...field} variant="outlined" error={!!errors.name} helperText={errors.name?.message} />}
+            render={({ field }) => <TextField {...field} variant="outlined" error={!!errors.name} helperText={errors.name?.message} />}
           />
         </FormControl>
       </Box>
@@ -238,7 +227,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="description"
             control={control}
-            render={({ field }: { field: any }) => (
+            render={({ field }) => (
               <>
                 <textarea {...field} style={customTextareaStyle} rows={4} />
                 {errors.description && <Typography color="error">{errors.description.message}</Typography>}
@@ -253,7 +242,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="category"
             control={control}
-            render={({ field }: { field: any }) => (
+            render={({ field }) => (
               <Select {...field} value={field.value || ''} sx={formLabel} error={!!errors.category}>
                 <MenuItem value="Category1">Category1</MenuItem>
                 <MenuItem value="Category2">Category2</MenuItem>
@@ -267,7 +256,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="price"
             control={control}
-            render={({ field }: { field: any }) => <TextField {...field} type="number" error={!!errors.price} helperText={errors.price?.message} />}
+            render={({ field }) => <TextField {...field} type="number" error={!!errors.price} helperText={errors.price?.message} />}
           />
         </FormControl>
       </Box>
@@ -275,9 +264,9 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
         <FormControl fullWidth sx={{ marginRight: 1, width: '50%' }}>
           <FormLabel sx={formLabel}>In Stock Quantity</FormLabel>
           <Controller
-            name="quantity"
+            name="inStockQuantity"
             control={control}
-            render={({ field }: { field: any }) => <TextField {...field} type="number" sx={marginRightSelect} error={!!errors.quantity} helperText={errors.quantity?.message} />}
+            render={({ field }) => <TextField {...field} type="number" sx={marginRightSelect} error={!!errors.inStockQuantity} helperText={errors.inStockQuantity?.message} />}
           />
         </FormControl>
         <FormControl fullWidth>
@@ -285,7 +274,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="imageUrl"
             control={control}
-            render={({ field }: { field: any }) => (
+            render={({ field }) => (
               <TextField
                 {...field}
                 sx={{ marginRight: 1 }}
