@@ -164,6 +164,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
       setValue('price', product.price);
       setValue('inStockQuantity', product.inStockQuantity);
       setValue('imageUrl', product.imageUrl);
+      // @ts-ignore
       setImagePreview(product.imageUrl);
     }
   }, [product, setValue]);
@@ -190,7 +191,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
 
   const handleDelete = async () => {
     if (productId) {
-      await dispatch(removeProduct(Number(productId)));
+      await dispatch(removeProduct(productId));
       navigate(`/user/${userId}/products`);
     } else {
       console.error('Product ID is missing');
@@ -217,7 +218,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="name"
             control={control}
-            render={({ field }) => <TextField {...field} variant="outlined" error={!!errors.name} helperText={errors.name?.message} />}
+            render={({ field }: { field: any }) => <TextField {...field} variant="outlined" error={!!errors.name} helperText={errors.name?.message} />}
           />
         </FormControl>
       </Box>
@@ -227,7 +228,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="description"
             control={control}
-            render={({ field }) => (
+            render={({ field }: { field: any }) => (
               <>
                 <textarea {...field} style={customTextareaStyle} rows={4} />
                 {errors.description && <Typography color="error">{errors.description.message}</Typography>}
@@ -242,7 +243,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="category"
             control={control}
-            render={({ field }) => (
+            render={({ field }: { field: any }) => (
               <Select {...field} value={field.value || ''} sx={formLabel} error={!!errors.category}>
                 <MenuItem value="Category1">Category1</MenuItem>
                 <MenuItem value="Category2">Category2</MenuItem>
@@ -256,7 +257,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="price"
             control={control}
-            render={({ field }) => <TextField {...field} type="number" error={!!errors.price} helperText={errors.price?.message} />}
+            render={({ field }: { field: any }) => <TextField {...field} type="number" error={!!errors.price} helperText={errors.price?.message} />}
           />
         </FormControl>
       </Box>
@@ -266,7 +267,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="inStockQuantity"
             control={control}
-            render={({ field }) => <TextField {...field} type="number" sx={marginRightSelect} error={!!errors.inStockQuantity} helperText={errors.inStockQuantity?.message} />}
+            render={({ field }: { field: any }) => <TextField {...field} type="number" sx={marginRightSelect} error={!!errors.inStockQuantity} helperText={errors.inStockQuantity?.message} />}
           />
         </FormControl>
         <FormControl fullWidth>
@@ -274,7 +275,7 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
           <Controller
             name="imageUrl"
             control={control}
-            render={({ field }) => (
+            render={({ field }: { field: any }) => (
               <TextField
                 {...field}
                 sx={{ marginRight: 1 }}

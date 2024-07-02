@@ -47,7 +47,7 @@ const ProductDetailsPage = () => {
         {userId && <CartIcon onClick={toggleCart} userId={userId} />}
       </Box>
       <Box sx={outContainerStyle}>
-        <ProductDetails product={product} userId={userId ?? ''} />
+        <ProductDetails product={{ ...product, imageUrl: product.imageUrl ?? '' }} userId={userId ?? ''} />
       </Box>
       {isCartOpen && <Cart onClose={toggleCart} />}
       <FakeFooter />

@@ -127,7 +127,8 @@ interface AddToCartPayload {
 }
 
 const discountCodes: { [key: string]: number } = {
-  '20DOLLAROFF': 20,
+  '20OFF': 20,
+  '30OFF': 30,
 };
 
 const productsSlice = createSlice({
@@ -169,11 +170,17 @@ const productsSlice = createSlice({
         const cartProductIndex = state.cart[userId].findIndex(
           (p) => p.id1 === productId || p.id === productId
         );
+        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1 || p.id === product.id);
         if (cartProductIndex !== -1) {
           if (product.cartQuantity === 0) {
             state.cart[userId].splice(cartProductIndex, 1);
           } else {
-            state.cart[userId][cartProductIndex] = { ...product };
+            // @ts-ignore
+            cartProduct.cartQuantity = product.cartQuantity;
+            // @ts-ignore
+            cartProduct.quantity !== undefined ? cartProduct.quantity = product.quantity : cartProduct.inStockQuantity = product.inStockQuantity;
+            // @ts-ignore
+            cartProduct.discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
           }
         }
         localStorage.setItem('cart', JSON.stringify(state.cart));
@@ -194,7 +201,13 @@ const productsSlice = createSlice({
     },
     applyDiscountCode: (state, action: PayloadAction<string>) => {
       const code = action.payload;
-      const discountAmount = discountCodes[code];
+      const discountAmount = discountCodes[code] || 0;
+      state.discountCode = null;
+      Object.keys(state.cart).forEach((userId) => {
+        state.cart[userId].forEach((item) => {
+          item.discount = 0;
+        });
+      });
       if (discountAmount) {
         state.discountCode = code;
         Object.keys(state.cart).forEach((userId) => {
@@ -205,6 +218,7 @@ const productsSlice = createSlice({
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
+
     removeDiscountCode: (state) => {
       state.discountCode = null;
       Object.keys(state.cart).forEach(userId => {
@@ -231,7 +245,7 @@ const productsSlice = createSlice({
         }
       })
       .addCase(removeProduct.fulfilled, (state, action: PayloadAction<string>) => {
-        state.products = state.products.filter((product) => product.id1 !== action.payload && product.id !== action.payload);
+        state.products = state.products.filter((product) => product.id1 !== action.payload && product.id !== Number(action.payload));
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         const index = state.products.findIndex(product => product.id === action.payload.id);

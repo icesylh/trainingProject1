@@ -150,7 +150,7 @@ export const ProductCard = () => {
             <Box key={product.id} sx={gridItemStyle(isMobile)}>
               <SingleProductCard
                 id={product.id}
-                imageUrl={product.imageUrl}
+                imageUrl={product.imageUrl ?? ''}
                 namee={product.name}
                 price={product.price}
                 cartQuantity={product.cartQuantity}

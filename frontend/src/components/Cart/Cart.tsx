@@ -12,15 +12,19 @@ import { useParams } from 'react-router-dom';
 
 interface Product {
     id: number;
-    imageUrl: string;
+    id1?: string;
+    image?: string;
+    imageUrl?: string;
     name: string;
     price: number;
     category: string;
     description: string;
-    inStockQuantity: number;
+    quantity?: number;
+    inStockQuantity?: number;
     cartQuantity: number;
     inStock: boolean;
     discount: number;
+    seller?: string;
 }
 
 interface CartProps {
@@ -242,9 +246,9 @@ const Cart = ({ onClose }: CartProps) => {
                 <Divider sx={{ my: 2 }} />
                 <Box sx={priceSectionStyle}>
                     <Typography sx={priceTextStyle}>Subtotal: <span>${cart.reduce((total: number, item: Product) => total + item.price * item.cartQuantity, 0).toFixed(2)}</span></Typography>
-                    <Typography sx={priceTextStyle}>Tax: <span>${(cart.reduce((total: number, item: Product) => total + item.price * item.cartQuantity, 0) * 0.1).toFixed(2)}</span></Typography>
                     <Typography sx={priceTextStyle}>Discount: <span>${cart.reduce((total: number, item: Product) => total + item.discount * item.cartQuantity, 0).toFixed(2)}</span></Typography>
-                    <Typography sx={priceTextStyle}>Estimated total: <span>${(cart.reduce((total: number, item: Product) => total + (item.price - item.discount) * item.cartQuantity, 0) * 1.1).toFixed(2)}</span></Typography>
+                    <Typography sx={priceTextStyle}>Tax: <span>${(cart.reduce((total: number, item: Product) => total + (item.price -  item.discount) * item.cartQuantity, 0) * 0.1).toFixed(2)}</span></Typography>
+                    <Typography sx={priceTextStyle}>Estimated total: <span>${(cart.reduce((total: number, item: Product) => total + (item.price -  item.discount) * item.cartQuantity, 0) * 1.1).toFixed(2)}</span></Typography>
                 </Box>
                 <Button variant="contained" color="primary" sx={{ mt: 'auto', backgroundColor: '#5048e6' }} fullWidth>Continue to checkout</Button>
             </Box>
