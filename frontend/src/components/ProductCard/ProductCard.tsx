@@ -127,7 +127,7 @@ export const ProductCard = () => {
     navigate(`/user/${userId}/create-product`);
   };
 
-  const handleEdit = (productId: number) => {
+  const handleEdit = (productId: string) => {
     navigate(`/user/${userId}/create-product/${productId}`);
   };
 
@@ -156,7 +156,7 @@ export const ProductCard = () => {
                 cartQuantity={product.cartQuantity}
                 onAdd={() => handleAdd(product.id)}
                 onRemove={() => handleRemove(product.id)}
-                onEdit={() => handleEdit(product.id)}
+                onEdit={() => handleEdit(product.id1|| "")}
                 isAdmin={isAdmin}
                 inStock={product.inStock}
               />
