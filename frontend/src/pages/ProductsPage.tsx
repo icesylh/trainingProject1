@@ -33,6 +33,7 @@ const ProductsPage = () => {
     setIsCartOpen(!isCartOpen);
   };
 
+    // TODO: Fix header
   return (
       <>
         <Box sx={headerStyle}>

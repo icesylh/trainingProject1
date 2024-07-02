@@ -33,12 +33,14 @@ const ProductDetailsPage = () => {
         setIsCartOpen(!isCartOpen);
     };
 
+    // TODO: Fix header
     return (
         <>
             <Box sx={headerStyle}>
                 <Header />
                 {userId && <CartIcon onClick={toggleCart} userId={userId} />}
             </Box>
+
             <Box sx={outContainerStyle}>
                 <ProductDetails userId={userId ?? ''} />
             </Box>
