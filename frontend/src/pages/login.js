@@ -22,7 +22,7 @@ const Login = () => {
           localStorage.setItem('token', email)
 
           setTimeout(() => {
-            history.push(
+            navigate(
               `/user/${res.data.data.name}/${res.data.Token}/products`
             )
           }, 1000)
@@ -77,3 +77,4 @@ const Login = () => {
 }
 
 export default Login
+

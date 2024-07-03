@@ -19,8 +19,7 @@ const Update = () => {
         if (res.data.Code === 200) {
           message.success(res.data.Msg)
           setTimeout(() => {
-            navigate('/end')
-            history.push('/send')
+            navigate('/send')
           }, 1000)
         } else {
           message.error(res.data.Msg)
