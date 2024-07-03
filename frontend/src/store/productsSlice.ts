@@ -72,6 +72,28 @@ export const fetchProductById = createAsyncThunk(
   }
 );
 
+// Fetch cart by user
+export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { rejectWithValue }) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await api.get('/api/cart', {
+      headers: {
+        authorization: `${token}`
+      }
+    });
+    return response.data.items.map((item: any) => ({
+      productId: item.productId,
+      cartQuantity: item.quantity
+    }));
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data);
+    } else {
+      return rejectWithValue('An unknown error occurred');
+    }
+  }
+});
+
 // Add product
 export const addProduct = createAsyncThunk('products/createProduct', async (product: Product, { rejectWithValue }) => {
   try {
@@ -137,7 +159,7 @@ const productsSlice = createSlice({
   reducers: {
     addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
+      const product = state.products.find((p) => p.id1 === productId);
       if (product && (product.quantity || product.inStockQuantity) && (product.quantity! > 0 || product.inStockQuantity! > 0)) {
         product.cartQuantity += 1;
         product.quantity !== undefined ? product.quantity -= 1 : product.inStockQuantity! -= 1;
@@ -146,7 +168,7 @@ const productsSlice = createSlice({
           state.cart[userId] = [];
         }
 
-        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1 || p.id === product.id);
+        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1);
         if (!cartProduct) {
           const discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
           state.cart[userId].push({ ...product, discount });
@@ -163,14 +185,14 @@ const productsSlice = createSlice({
       action: PayloadAction<{ productId: string | number; userId: string }>
     ) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
+      const product = state.products.find((p) => p.id1 === productId);
       if (product && product.cartQuantity > 0) {
         product.cartQuantity -= 1;
         product.quantity !== undefined ? product.quantity += 1 : product.inStockQuantity! += 1;
         const cartProductIndex = state.cart[userId].findIndex(
           (p) => p.id1 === productId || p.id === productId
         );
-        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1 || p.id === product.id);
+        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1);
         if (cartProductIndex !== -1) {
           if (product.cartQuantity === 0) {
             state.cart[userId].splice(cartProductIndex, 1);
@@ -191,11 +213,11 @@ const productsSlice = createSlice({
       action: PayloadAction<{ productId: string | number; userId: string }>
     ) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
+      const product = state.products.find((p) => p.id1 === productId);
       if (product) {
         product.quantity !== undefined ? product.quantity += product.cartQuantity : product.inStockQuantity! += product.cartQuantity;
         product.cartQuantity = 0;
-        state.cart[userId] = state.cart[userId].filter((p) => p.id1 !== productId && p.id !== productId);
+        state.cart[userId] = state.cart[userId].filter((p) => p.id1 !== productId);
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
@@ -254,6 +276,11 @@ const productsSlice = createSlice({
         } else {
           state.products.push(action.payload);
         }
+      })
+      .addCase(fetchCart.fulfilled, (state, action) => {
+        const userId = action.meta.arg;
+        console.log(userId)
+
       });
   }
 });

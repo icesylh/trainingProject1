@@ -6,6 +6,9 @@ import Cart from '../components/Cart/Cart';
 import CartIcon from '../components/Cart/CartIcon';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { fetchCart } from '../store/productsSlice';
 
 const outContainerStyle = {
   backgroundColor: '#f9f9f9',
@@ -32,6 +35,14 @@ const ProductsPage = () => {
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+      if (userId) {
+          // @ts-ignore
+          dispatch(fetchCart(userId));
+      }
+  }, [dispatch, userId]);
 
     // TODO: Fix header
   return (

@@ -2,7 +2,7 @@ const Cart = require('../data/models/cart');
 
 exports.getCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.user._id }).populate('items.productId');
+        const cart = await Cart.findOne({ userId: req.user });
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
         }

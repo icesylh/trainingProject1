@@ -1,5 +1,5 @@
 import { Box, Button, TextField, Typography, Select, MenuItem, FormControl, FormLabel, InputAdornment } from '@mui/material';
-import { ReactComponent as ImagePreviewIcon } from '../../assets/imagePreview.svg';
+import { ReactComponent as ImagePreviewIcon } from './imagePreview.svg';
 import { addProduct, updateProduct, removeProduct, fetchProductById } from '../../store/productsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -113,7 +113,7 @@ const schema = yup.object().shape({
   description: yup.string().required('Product description is required').min(10, 'Product description must be at least 10 characters').max(100, 'Product description must be less than 100 characters'),
   category: yup.string().required('Category is required'),
   price: yup.number().required('Price is required').min(0, 'Price must be a positive number'),
-  inStockQuantity: yup.number().required('In Stock Quantity is required').min(0, 'In Stock Quantity must be a positive number'),
+  quantity: yup.number().required('In Stock Quantity is required').min(0, 'In Stock Quantity must be a positive number'),
   imageUrl: yup.string().test('is-url-or-base64', 'Image URL must be a valid URL', (value) => {
     const urlPattern = /^(http|https):\/\/[^\s$.?#].[^\s]*$/gm;
     const base64Pattern = /^data:image\/[a-zA-Z]+;base64,[^\s]+$/gm;
@@ -139,10 +139,11 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
 
   const imageUrl = watch('imageUrl', 'http://');
   const product = useSelector((state: RootState) =>
-    id ? state.products.products.find(p => p.id === Number(id)) : null
+      id ? state.products.products.find(p => p.id1 === id) : null
   );
 
   useEffect(() => {
+    console.log('Image URL changed:', imageUrl);
     if (imageUrl && imageUrl !== 'http://') {
       setImagePreview(imageUrl);
     } else {
@@ -151,43 +152,53 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
   }, [imageUrl]);
 
   useEffect(() => {
+    console.log('Fetching product by ID:', id);
     if (id && !product) {
       dispatch(fetchProductById(id));
     }
   }, [dispatch, id, product]);
 
   useEffect(() => {
+    console.log('Product found:', product);
     if (product) {
       setValue('name', product.name);
       setValue('description', product.description);
       setValue('category', product.category);
       setValue('price', product.price);
-      setValue('inStockQuantity', product.inStockQuantity);
-      setValue('imageUrl', product.imageUrl);
+      setValue('quantity', product.quantity);
+      setValue('imageUrl', product.image);
       // @ts-ignore
-      setImagePreview(product.imageUrl);
+      setImagePreview(product.image);
     }
   }, [product, setValue]);
 
   const onSubmit = async (data: any) => {
+    console.log('Submitting data:', data);
     if (userId) {
       const newProduct = {
         ...data,
-        id: product ? product.id : Date.now(),
-        inStock: data.inStockQuantity > 0,
-        cartQuantity: 0,
+        id1: product ? product.id1 : Date.now(), // 这里使用 id1 作为产品 ID
+        inStock: data.quantity > 0,
+        image: data.imageUrl,
+        userEmail: userId
       };
 
+      console.log('New Product Data:', newProduct);
+
       if (product) {
-        await dispatch(updateProduct({ ...newProduct, userId }));
+        console.log('Updating product with ID:', product.id1);
+        await dispatch(updateProduct({ product: newProduct })); // 传递 userId 和 product
       } else {
-        await dispatch(addProduct({ ...newProduct, userId }));
+        console.log('Adding new product');
+        await dispatch(addProduct(newProduct));
       }
       navigate(`/user/${userId}/products`);
     } else {
       console.error('User ID is missing');
     }
   };
+
+
 
   const handleDelete = async () => {
     if (productId) {
@@ -211,117 +222,117 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
   };
 
   return (
-    <Box sx={outerBoxStyle(isMobile)}>
-      <Box sx={marginBottomBox}>
-        <FormControl fullWidth>
-          <FormLabel sx={formLabel}>Product name</FormLabel>
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }: { field: any }) => <TextField {...field} variant="outlined" error={!!errors.name} helperText={errors.name?.message} />}
-          />
-        </FormControl>
-      </Box>
-      <Box sx={marginBottomBox}>
-        <FormControl fullWidth>
-          <FormLabel sx={formLabel}>Product Description</FormLabel>
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }: { field: any }) => (
-              <>
-                <textarea {...field} style={customTextareaStyle} rows={4} />
-                {errors.description && <Typography color="error">{errors.description.message}</Typography>}
-              </>
+      <Box sx={outerBoxStyle(isMobile)}>
+        <Box sx={marginBottomBox}>
+          <FormControl fullWidth>
+            <FormLabel sx={formLabel}>Product name</FormLabel>
+            <Controller
+                name="name"
+                control={control}
+                render={({ field }: { field: any }) => <TextField {...field} variant="outlined" error={!!errors.name} helperText={errors.name?.message} />}
+            />
+          </FormControl>
+        </Box>
+        <Box sx={marginBottomBox}>
+          <FormControl fullWidth>
+            <FormLabel sx={formLabel}>Product Description</FormLabel>
+            <Controller
+                name="description"
+                control={control}
+                render={({ field }: { field: any }) => (
+                    <>
+                      <textarea {...field} style={customTextareaStyle} rows={4} />
+                      {errors.description && <Typography color="error">{errors.description.message}</Typography>}
+                    </>
+                )}
+            />
+          </FormControl>
+        </Box>
+        <Box sx={flexBox(isMobile)}>
+          <FormControl fullWidth sx={marginRightSelect}>
+            <FormLabel sx={formLabel}>Category</FormLabel>
+            <Controller
+                name="category"
+                control={control}
+                render={({ field }: { field: any }) => (
+                    <Select {...field} value={field.value || ''} sx={formLabel} error={!!errors.category}>
+                      <MenuItem value="Category1">Category1</MenuItem>
+                      <MenuItem value="Category2">Category2</MenuItem>
+                    </Select>
+                )}
+            />
+            {errors.category && <Typography color="error">{errors.category.message}</Typography>}
+          </FormControl>
+          <FormControl fullWidth>
+            <FormLabel sx={formLabel}>Price</FormLabel>
+            <Controller
+                name="price"
+                control={control}
+                render={({ field }: { field: any }) => <TextField {...field} type="number" error={!!errors.price} helperText={errors.price?.message} />}
+            />
+          </FormControl>
+        </Box>
+        <Box sx={flexBox(isMobile)}>
+          <FormControl fullWidth sx={{ marginRight: 1, width: '50%' }}>
+            <FormLabel sx={formLabel}>In Stock Quantity</FormLabel>
+            <Controller
+                name="quantity"
+                control={control}
+                render={({ field }: { field: any }) => <TextField {...field} type="number" sx={marginRightSelect} error={!!errors.quantity} helperText={errors.quantity?.message} />}
+            />
+          </FormControl>
+          <FormControl fullWidth>
+            <FormLabel sx={formLabel}>Add Image Link</FormLabel>
+            <Controller
+                name="imageUrl"
+                control={control}
+                render={({ field }: { field: any }) => (
+                    <TextField
+                        {...field}
+                        sx={{ marginRight: 1 }}
+                        InputProps={{
+                          endAdornment: (
+                              <InputAdornment position="end">
+                                <Button variant="contained" component="label" sx={uploadButtonStyle}>
+                                  Upload
+                                  <input type="file" hidden accept="image/*" onChange={handleImageChange} />
+                                </Button>
+                              </InputAdornment>
+                          ),
+                        }}
+                        error={!!errors.imageUrl}
+                        helperText={errors.imageUrl?.message}
+                    />
+                )}
+            />
+          </FormControl>
+        </Box>
+        <Box sx={imagePreviewContainerStyle}>
+          <Box sx={imagePreviewBoxStyle}>
+            {imagePreview ? (
+                <img alt="Preview" src={imagePreview} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            ) : (
+                <>
+                  <Box sx={{ marginBottom: '10px' }}>
+                    <ImagePreviewIcon width="64px" height="64px" />
+                  </Box>
+                  <Typography variant="body1" color="textSecondary">
+                    image preview!
+                  </Typography>
+                </>
             )}
-          />
-        </FormControl>
-      </Box>
-      <Box sx={flexBox(isMobile)}>
-        <FormControl fullWidth sx={marginRightSelect}>
-          <FormLabel sx={formLabel}>Category</FormLabel>
-          <Controller
-            name="category"
-            control={control}
-            render={({ field }: { field: any }) => (
-              <Select {...field} value={field.value || ''} sx={formLabel} error={!!errors.category}>
-                <MenuItem value="Category1">Category1</MenuItem>
-                <MenuItem value="Category2">Category2</MenuItem>
-              </Select>
-            )}
-          />
-          {errors.category && <Typography color="error">{errors.category.message}</Typography>}
-        </FormControl>
-        <FormControl fullWidth>
-          <FormLabel sx={formLabel}>Price</FormLabel>
-          <Controller
-            name="price"
-            control={control}
-            render={({ field }: { field: any }) => <TextField {...field} type="number" error={!!errors.price} helperText={errors.price?.message} />}
-          />
-        </FormControl>
-      </Box>
-      <Box sx={flexBox(isMobile)}>
-        <FormControl fullWidth sx={{ marginRight: 1, width: '50%' }}>
-          <FormLabel sx={formLabel}>In Stock Quantity</FormLabel>
-          <Controller
-            name="inStockQuantity"
-            control={control}
-            render={({ field }: { field: any }) => <TextField {...field} type="number" sx={marginRightSelect} error={!!errors.inStockQuantity} helperText={errors.inStockQuantity?.message} />}
-          />
-        </FormControl>
-        <FormControl fullWidth>
-          <FormLabel sx={formLabel}>Add Image Link</FormLabel>
-          <Controller
-            name="imageUrl"
-            control={control}
-            render={({ field }: { field: any }) => (
-              <TextField
-                {...field}
-                sx={{ marginRight: 1 }}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Button variant="contained" component="label" sx={uploadButtonStyle}>
-                        Upload
-                        <input type="file" hidden accept="image/*" onChange={handleImageChange} />
-                      </Button>
-                    </InputAdornment>
-                  ),
-                }}
-                error={!!errors.imageUrl}
-                helperText={errors.imageUrl?.message}
-              />
-            )}
-          />
-        </FormControl>
-      </Box>
-      <Box sx={imagePreviewContainerStyle}>
-        <Box sx={imagePreviewBoxStyle}>
-          {imagePreview ? (
-            <img alt="Preview" src={imagePreview} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          ) : (
-            <>
-              <Box sx={{ marginBottom: '10px' }}>
-                <ImagePreviewIcon width="64px" height="64px" />
-              </Box>
-              <Typography variant="body1" color="textSecondary">
-                image preview!
-              </Typography>
-            </>
+          </Box>
+        </Box>
+        <Box sx={buttonContainerStyle(isMobile)}>
+          <Button variant="contained" sx={{ ...addButtonStyle }} onClick={handleSubmit(onSubmit)}>
+            {product ? 'Update Product' : 'Add Product'}
+          </Button>
+          {product && (
+              <Button variant="contained" sx={{ ...deleteButtonStyle }} onClick={handleDelete}>
+                Delete Product
+              </Button>
           )}
         </Box>
       </Box>
-      <Box sx={buttonContainerStyle(isMobile)}>
-        <Button variant="contained" sx={{ ...addButtonStyle }} onClick={handleSubmit(onSubmit)}>
-          {product ? 'Update Product' : 'Add Product'}
-        </Button>
-        {product && (
-          <Button variant="contained" sx={{ ...deleteButtonStyle }} onClick={handleDelete}>
-            Delete Product
-          </Button>
-        )}
-      </Box>
-    </Box>
   );
 };

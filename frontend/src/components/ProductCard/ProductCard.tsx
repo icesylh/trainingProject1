@@ -115,11 +115,11 @@ export const ProductCard = () => {
     setCurrentPage(page);
   };
 
-  const handleAdd = (id: number) => {
+  const handleAdd = (id: string) => {
     dispatch(addToCart({ productId: id, userId: userId! }));
   };
 
-  const handleRemove = (id: number) => {
+  const handleRemove = (id: string) => {
     dispatch(removeFromCart({ productId: id, userId: userId! }));
   };
 
@@ -127,7 +127,7 @@ export const ProductCard = () => {
     navigate(`/user/${userId}/create-product`);
   };
 
-  const handleEdit = (productId: number) => {
+  const handleEdit = (productId: string) => {
     navigate(`/user/${userId}/create-product/${productId}`);
   };
 
@@ -144,19 +144,19 @@ export const ProductCard = () => {
           <SortDropDown isAdmin={isAdmin} value={sort} onChange={handleSortChange} onAddProduct={handleAddProduct} />
         </Box>
       </Box>
-      <Box sx={productsInnerContainerStyle}>
+      <Box sx={productsInnerContainerStyle} key={Math.random()}>
         <Box sx={gridContainerStyle(isMobile)}>
           {displayedProducts.map((product) => (
-            <Box key={product.id} sx={gridItemStyle(isMobile)}>
+            <Box key={product.id1} sx={gridItemStyle(isMobile)}>
               <SingleProductCard
                 id1={product.id1|| ""}
                 image={product.image ?? ''}
                 namee={product.name}
                 price={product.price}
                 cartQuantity={product.cartQuantity}
-                onAdd={() => handleAdd(product.id)}
-                onRemove={() => handleRemove(product.id)}
-                onEdit={() => handleEdit(product.id)}
+                onAdd={() => handleAdd(product.id1|| "")}
+                onRemove={() => handleRemove(product.id1|| "")}
+                onEdit={() => handleEdit(product.id1|| "")}
                 isAdmin={isAdmin}
                 inStock={product.inStock}
               />

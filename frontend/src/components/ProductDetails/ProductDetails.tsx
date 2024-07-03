@@ -140,7 +140,7 @@ export const ProductDetails = ({ userId }: { userId: string }) => {
   );
 
   // @ts-ignore
-  const cartItem = useSelector((state: RootState) => state.products.cart[userId]?.find(item => item.id === product.id));
+  const cartItem = useSelector((state: RootState) => state.products.cart[userId]?.find(item => item.id1 === product.id1));
 
   useEffect(() => {
     if (id && !product) {
@@ -160,11 +160,11 @@ export const ProductDetails = ({ userId }: { userId: string }) => {
   }
 
   const handleAddToCart = () => {
-    dispatch(addToCart({ productId: product.id, userId }));
+    dispatch(addToCart({ productId: product.id1||"", userId }));
   };
 
   const handleRemoveFromCart = () => {
-    dispatch(removeFromCart({ productId: product.id, userId }));
+    dispatch(removeFromCart({ productId: product.id1||"", userId }));
   };
 
   return (
