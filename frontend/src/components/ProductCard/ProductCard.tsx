@@ -5,7 +5,7 @@ import { SortDropDown } from './SortDropDown';
 import { Pagination } from './Pagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
-import { addToCart, removeFromCart, fetchProducts } from '../../store/productsSlice';
+import { addToCart, removeFromCart, fetchProducts,pushCart } from '../../store/productsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const outContainerStyle = {
@@ -81,11 +81,13 @@ export const ProductCard = () => {
   const products = useSelector((state: RootState) => state.products.products);
   const dispatch = useDispatch<AppDispatch>();
 
+
   const [sort, setSort] = useState('lastAdded');
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = isMobile ? 3 : 10;
   const totalPages = Math.ceil(products.length / productsPerPage);
   const navigate = useNavigate();
+  const cart = useSelector((state: RootState) => (userId ? state.products.cart[userId] : []) || []);
 
   useEffect(() => {
     if (userId) {
@@ -115,12 +117,16 @@ export const ProductCard = () => {
     setCurrentPage(page);
   };
 
-  const handleAdd = (id: string) => {
+  const handleAdd = (id: string, quantity:number) => {
     dispatch(addToCart({ productId: id, userId: userId! }));
+    quantity+=1;
+    dispatch(pushCart({productId: id, quantity: quantity}))
   };
 
-  const handleRemove = (id: string) => {
+  const handleRemove = (id: string, quantity:number) => {
     dispatch(removeFromCart({ productId: id, userId: userId! }));
+    quantity-=1;
+    dispatch(pushCart({productId: id, quantity: quantity}))
   };
 
   const handleAddProduct = () => {
@@ -154,8 +160,8 @@ export const ProductCard = () => {
                 namee={product.name}
                 price={product.price}
                 cartQuantity={product.cartQuantity}
-                onAdd={() => handleAdd(product.id1|| "")}
-                onRemove={() => handleRemove(product.id1|| "")}
+                onAdd={() => handleAdd(product.id1|| "", product.cartQuantity)}
+                onRemove={() => handleRemove(product.id1|| "", product.cartQuantity)}
                 onEdit={() => handleEdit(product.id1|| "")}
                 isAdmin={isAdmin}
                 inStock={product.inStock}

@@ -32,6 +32,7 @@ const ProductsPage = () => {
   const { userId } = useParams<{ userId: string }>();
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };

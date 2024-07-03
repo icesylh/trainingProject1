@@ -94,6 +94,27 @@ export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { rejectWi
   }
 });
 
+export const pushCart = createAsyncThunk('cart/pushCart', async ({productId, quantity}: {productId: string, quantity: number}, { rejectWithValue }) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await api.post('/api/cart/update', {
+      productId,
+      quantity
+    }, {
+      headers: {
+        authorization: `${token}`
+      }
+    });
+    return response.data.items;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data);
+    } else {
+      return rejectWithValue('An unknown error occurred');
+    }
+  }
+});
+
 // Add product
 export const addProduct = createAsyncThunk('products/createProduct', async (product: Product, { rejectWithValue }) => {
   try {
@@ -277,9 +298,50 @@ const productsSlice = createSlice({
           state.products.push(action.payload);
         }
       })
+      .addCase(pushCart.fulfilled, (state, action) => {
+          console.log('Cart pushed successfully:', action.payload);
+      })
       .addCase(fetchCart.fulfilled, (state, action) => {
         const userId = action.meta.arg;
-        console.log(userId)
+
+        action.payload.forEach((item: any) => {
+          console.log(item.productId, item.cartQuantity);
+          //modify item in state.products
+          const p1 = state.products.find(p => p.id1 === item.productId);
+          if(p1) {
+            const update = item.cartQuantity - p1.cartQuantity;
+            p1.cartQuantity += update;
+            p1.quantity !== undefined ? p1.quantity -= update : p1.inStockQuantity! -= update;
+
+          }
+          // @ts-ignore
+          if (!state.cart[userId]) {
+            // @ts-ignore
+            state.cart[userId] = [];
+
+          }
+          //modify item in state.cart[userId]
+          // @ts-ignore
+          const p2 = state.cart[userId].find(p => p.id1 === item.productId);
+          if(p2) {
+            const update = item.cartQuantity - p2.cartQuantity;
+            p2.cartQuantity += update;
+            p2.quantity !== undefined ? p2.quantity -= update : p2.inStockQuantity! -= update;
+          } else {
+            // @ts-ignore
+            const discount: number = 0
+            // @ts-ignore
+            state.cart[userId].push({ ...p1, discount });
+          }
+        });
+        state.products.forEach(p => {
+          console.log(p.name, p.cartQuantity);
+        })
+        console.log('---')
+        // @ts-ignore
+        state.cart[userId].forEach(p => {
+          console.log(p.name,p.cartQuantity);
+        })
 
       });
   }

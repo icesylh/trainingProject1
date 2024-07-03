@@ -143,7 +143,6 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
   );
 
   useEffect(() => {
-    console.log('Image URL changed:', imageUrl);
     if (imageUrl && imageUrl !== 'http://') {
       setImagePreview(imageUrl);
     } else {
@@ -173,7 +172,6 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
   }, [product, setValue]);
 
   const onSubmit = async (data: any) => {
-    console.log('Submitting data:', data);
     if (userId) {
       const newProduct = {
         ...data,
@@ -183,13 +181,10 @@ export const CreateProductForm = ({ userId, isMobile, productId }: CreateProduct
         userEmail: userId
       };
 
-      console.log('New Product Data:', newProduct);
 
       if (product) {
-        console.log('Updating product with ID:', product.id1);
         await dispatch(updateProduct({ product: newProduct })); // 传递 userId 和 product
       } else {
-        console.log('Adding new product');
         await dispatch(addProduct(newProduct));
       }
       navigate(`/user/${userId}/products`);
