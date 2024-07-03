@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { CustomButton } from '../Button/CustomButton';
 import { StockTag } from './StockTag';
-import { fetchProductById } from '../../store/productsSlice';
+import {fetchProductById, pushCart} from '../../store/productsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { addToCart, removeFromCart } from '../../store/productsSlice';
@@ -158,12 +158,16 @@ export const ProductDetails = ({ userId }: { userId: string }) => {
 
 
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (quantity:number) => {
     dispatch(addToCart({ productId: product.id1||"", userId }));
+    quantity+=1;
+    dispatch(pushCart({productId: product.id1||"", quantity: quantity}))
   };
 
-  const handleRemoveFromCart = () => {
+  const handleRemoveFromCart = (quantity:number) => {
     dispatch(removeFromCart({ productId: product.id1||"", userId }));
+    quantity+=1;
+    dispatch(pushCart({productId: product.id1||"", quantity: quantity}))
   };
 
   return (
@@ -187,12 +191,12 @@ export const ProductDetails = ({ userId }: { userId: string }) => {
             <Box sx={buttonBoxStyle(isMobile)}>
               {product.cartQuantity ? (
                   <Box sx={quantityContainerStyle}>
-                    <IconButton onClick={handleRemoveFromCart} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
+                    <IconButton onClick={()=>handleRemoveFromCart(product.cartQuantity)} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
                     <Typography sx={quantityTextStyle}>{product.cartQuantity}</Typography>
-                    <IconButton onClick={handleAddToCart} sx={{ color: 'white' }}><AddIcon /></IconButton>
+                    <IconButton onClick={()=>handleAddToCart(product.cartQuantity)} sx={{ color: 'white' }}><AddIcon /></IconButton>
                   </Box>
               ) : (
-                  <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={handleAddToCart} />
+                  <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={()=>handleAddToCart(product.cartQuantity)} />
               )}
 
 
