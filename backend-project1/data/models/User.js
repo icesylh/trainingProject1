@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema(
   {
@@ -6,8 +6,9 @@ const schema = new mongoose.Schema(
     account: { type: String, unique: true }, //unique 唯一键
     password: String,
     superior: String,
+    type: String
   },
-  { timestamps: true, versionKey: false },
-);
+  { timestamps: true, versionKey: false }
+)
 
-module.exports = mongoose.model("User", schema);
+module.exports = mongoose.model('User', schema)

@@ -12,7 +12,7 @@ const Update = () => {
 
   const onFinish = ({ email }) => {
     axios
-      .post('http://localhost:8088/Forgot', {
+      .post('http://localhost:8088/User/sendCode', {
         account: email
       })
       .then((res) => {
@@ -20,6 +20,7 @@ const Update = () => {
           message.success(res.data.Msg)
           setTimeout(() => {
             navigate('/end')
+            history.push('/send')
           }, 1000)
         } else {
           message.error(res.data.Msg)

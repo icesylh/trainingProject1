@@ -31,10 +31,10 @@ module.exports = {
         if (doc) {
           req.user = id;
           next();
-        } else res.send({ Code: 401, Msg: "没有登录状态" });
+        } else res.send({ Code: 401, Msg: "No login status" });
       });
     } catch (error) {
-      res.send({ Code: 401, Msg: "token失效" });
+      res.send({ Code: 401, Msg: "Token Failure" });
     }
   },
 };

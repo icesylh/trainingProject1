@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import { UserOutlined } from '@ant-design/icons'
 import { Input } from 'antd'
+import { useHistory } from 'react-router-dom'
 
 const Header = () => {
   const { Search } = Input
-
+  const history = useHistory()
+  const [token] = useState(localStorage.getItem('token'))
   return (
     <div className="header">
       <div className="header-box">
@@ -17,9 +19,19 @@ const Header = () => {
           <Search placeholder=" search" allowClear className="pc" />
         </div>
         <div className="right">
-          <div className="right-item">
+          <div
+            className="right-item"
+            onClick={() => {
+              if (token) {
+                localStorage.removeItem('token')
+                history.push('/')
+              } else {
+                history.push('/')
+              }
+            }}
+          >
             <UserOutlined style={{ fontSize: 20, marginRight: 10 }} />
-            <span className="item-name"> Sign in</span>
+            <span className="item-name">{token || 'Sign in'} </span>
           </div>
         </div>
       </div>

@@ -19,8 +19,12 @@ const Login = () => {
       .then((res) => {
         if (res.data.Code === 200) {
           message.success(res.data.Msg)
+          localStorage.setItem('token', email)
+
           setTimeout(() => {
-            navigate(`/user/${email}/products`)
+            history.push(
+              `/user/${res.data.data.name}/${res.data.Token}/products`
+            )
           }, 1000)
         } else {
           message.error(res.data.Msg)

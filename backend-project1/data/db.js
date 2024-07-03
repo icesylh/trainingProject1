@@ -11,3 +11,7 @@ mongoose.connection.on("connected", res => {
 mongoose.connection.on("error", err => {
   console.log("Mongoose connection error: " + err);
 });
+
+
+
+//mongodb://127.0.0.1:27017/b-cms
