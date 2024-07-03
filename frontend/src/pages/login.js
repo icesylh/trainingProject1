@@ -18,6 +18,8 @@ const Login = () => {
       })
       .then((res) => {
         if (res.data.Code === 200) {
+          // Save token to localStorage
+          localStorage.setItem('token', res.data.Token)
           message.success(res.data.Msg)
           setTimeout(() => {
             navigate(`/user/${email}/products`)
