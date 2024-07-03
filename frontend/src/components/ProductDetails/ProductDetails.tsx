@@ -135,13 +135,10 @@ export const ProductDetails = ({ userId }: { userId: string }) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
+  console.log(id);
   const product = useSelector((state: RootState) =>
       id ? state.products.products.find(p => p.id1 === id) : null
   );
-
-  // @ts-ignore
-  const cartItem = useSelector((state: RootState) => state.products.cart[userId]?.find(item => item.id1 === product.id1));
-
   useEffect(() => {
     if (id && !product) {
       dispatch(fetchProductById(id));
@@ -158,6 +155,8 @@ export const ProductDetails = ({ userId }: { userId: string }) => {
   if (!product) {
     return <Typography>Loading...</Typography>;
   }
+
+
 
   const handleAddToCart = () => {
     dispatch(addToCart({ productId: product.id1||"", userId }));
@@ -186,10 +185,10 @@ export const ProductDetails = ({ userId }: { userId: string }) => {
             <Typography variant="body2" sx={descriptionStyle}>{product.description}</Typography>
 
             <Box sx={buttonBoxStyle(isMobile)}>
-              {cartItem ? (
+              {product.cartQuantity ? (
                   <Box sx={quantityContainerStyle}>
                     <IconButton onClick={handleRemoveFromCart} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
-                    <Typography sx={quantityTextStyle}>{cartItem.cartQuantity}</Typography>
+                    <Typography sx={quantityTextStyle}>{product.cartQuantity}</Typography>
                     <IconButton onClick={handleAddToCart} sx={{ color: 'white' }}><AddIcon /></IconButton>
                   </Box>
               ) : (
