@@ -191,10 +191,11 @@ export const CreateProductForm = ({userId, isMobile, productId, token }: CreateP
         cartQuantity: 0,
       };
 
+
       if (product) {
         await dispatch(updateProduct({ product: newProduct }));
       } else {
-        await dispatch(addProduct({ ...newProduct, userId }));
+        await dispatch(addProduct(newProduct));
       }
       navigate(`/user/${userId}/${token}/products`);
     } else {
@@ -202,6 +203,8 @@ export const CreateProductForm = ({userId, isMobile, productId, token }: CreateP
     }
   };
   
+
+
 
 
   const handleDelete = async () => {

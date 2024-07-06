@@ -5,8 +5,11 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Cart from '../components/Cart/Cart';
 import CartIcon from '../components/Cart/CartIcon';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
+import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { fetchCart } from '../store/productsSlice';
 
 const outContainerStyle = {
   backgroundColor: '#f9f9f9',
@@ -46,6 +49,7 @@ const ProductsPage = () => {
     }
   }, [token, navigate]);
 
+
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };
@@ -57,6 +61,14 @@ const ProductsPage = () => {
       </Box>
     );
   }
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+      if (userId) {
+          // @ts-ignore
+          dispatch(fetchCart(userId));
+      }
+  }, [dispatch, userId]);
 
   return (
     <>

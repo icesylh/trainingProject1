@@ -203,7 +203,7 @@ const productsSlice = createSlice({
   reducers: {
     addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
+      const product = state.products.find((p) => p.id1 === productId);
       if (product && (product.quantity || product.inStockQuantity) && (product.quantity! > 0 || product.inStockQuantity! > 0)) {
         product.cartQuantity += 1;
         product.quantity !== undefined ? product.quantity -= 1 : product.inStockQuantity! -= 1;
@@ -212,7 +212,7 @@ const productsSlice = createSlice({
           state.cart[userId] = [];
         }
 
-        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1 || p.id === product.id);
+        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1);
         if (!cartProduct) {
           const discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
           state.cart[userId].push({ ...product, discount });
@@ -229,14 +229,14 @@ const productsSlice = createSlice({
       action: PayloadAction<{ productId: string | number; userId: string }>
     ) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
+      const product = state.products.find((p) => p.id1 === productId);
       if (product && product.cartQuantity > 0) {
         product.cartQuantity -= 1;
         product.quantity !== undefined ? product.quantity += 1 : product.inStockQuantity! += 1;
         const cartProductIndex = state.cart[userId].findIndex(
           (p) => p.id1 === productId || p.id === productId
         );
-        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1 || p.id === product.id);
+        const cartProduct = state.cart[userId].find((p) => p.id1 === product.id1);
         if (cartProductIndex !== -1) {
           if (product.cartQuantity === 0) {
             state.cart[userId].splice(cartProductIndex, 1);
@@ -257,11 +257,11 @@ const productsSlice = createSlice({
       action: PayloadAction<{ productId: string | number; userId: string }>
     ) => {
       const { productId, userId } = action.payload;
-      const product = state.products.find((p) => p.id1 === productId || p.id === productId);
+      const product = state.products.find((p) => p.id1 === productId);
       if (product) {
         product.quantity !== undefined ? product.quantity += product.cartQuantity : product.inStockQuantity! += product.cartQuantity;
         product.cartQuantity = 0;
-        state.cart[userId] = state.cart[userId].filter((p) => p.id1 !== productId && p.id !== productId);
+        state.cart[userId] = state.cart[userId].filter((p) => p.id1 !== productId);
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
@@ -325,40 +325,50 @@ const productsSlice = createSlice({
         }
       })
       .addCase(pushCart.fulfilled, (state, action) => {
-        console.log('Cart pushed successfully:', action.payload);
-    })
-    .addCase(fetchCart.fulfilled, (state, action) => {
-      const userId = action.meta.arg;
+          console.log('Cart pushed successfully:', action.payload);
+      })
+      .addCase(fetchCart.fulfilled, (state, action) => {
+        const userId = action.meta.arg;
 
-      action.payload.forEach((item: any) => {
-        console.log(item.productId, item.cartQuantity);
-        //modify item in state.products
-        const p1 = state.products.find(p => p.id1 === item.productId);
-        if(p1) {
-          const update = item.cartQuantity - p1.cartQuantity;
-          p1.cartQuantity += update;
-          p1.quantity !== undefined ? p1.quantity -= update : p1.inStockQuantity! -= update;
+        action.payload.forEach((item: any) => {
+          console.log(item.productId, item.cartQuantity);
+          //modify item in state.products
+          const p1 = state.products.find(p => p.id1 === item.productId);
+          if(p1) {
+            const update = item.cartQuantity - p1.cartQuantity;
+            p1.cartQuantity += update;
+            p1.quantity !== undefined ? p1.quantity -= update : p1.inStockQuantity! -= update;
 
-        }
+          }
+          // @ts-ignore
+          if (!state.cart[userId]) {
+            // @ts-ignore
+            state.cart[userId] = [];
+
+          }
+          //modify item in state.cart[userId]
+          // @ts-ignore
+          const p2 = state.cart[userId].find(p => p.id1 === item.productId);
+          if(p2) {
+            const update = item.cartQuantity - p2.cartQuantity;
+            p2.cartQuantity += update;
+            p2.quantity !== undefined ? p2.quantity -= update : p2.inStockQuantity! -= update;
+          } else {
+            // @ts-ignore
+            const discount: number = 0
+            // @ts-ignore
+            state.cart[userId].push({ ...p1, discount });
+          }
+        });
+        state.products.forEach(p => {
+          console.log(p.name, p.cartQuantity);
+        })
+        console.log('---')
         // @ts-ignore
-        if (!state.cart[userId]) {
-          // @ts-ignore
-          state.cart[userId] = [];
+        state.cart[userId].forEach(p => {
+          console.log(p.name,p.cartQuantity);
+        })
 
-        }
-        //modify item in state.cart[userId]
-        // @ts-ignore
-        const p2 = state.cart[userId].find(p => p.id1 === item.productId);
-        if(p2) {
-          const update = item.cartQuantity - p2.cartQuantity;
-          p2.cartQuantity += update;
-          p2.quantity !== undefined ? p2.quantity -= update : p2.inStockQuantity! -= update;
-        } else {
-          // @ts-ignore
-          const discount: number = 0
-          // @ts-ignore
-          state.cart[userId].push({ ...p1, discount });
-        }
       });
       state.products.forEach(p => {
         console.log(p.name, p.cartQuantity);

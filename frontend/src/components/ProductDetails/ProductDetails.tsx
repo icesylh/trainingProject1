@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { CustomButton } from '../Button/CustomButton';
 import { StockTag } from './StockTag';
+import {fetchProductById, pushCart} from '../../store/productsSlice';
 import { addToCart, removeFromCart } from '../../store/productsSlice';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -181,20 +182,22 @@ export const ProductDetails = ({ userId = '', token }: ProductDetailsProps) => {
     }
   };
 
-  const handleAddToCart = () => {
-    if (product) {
-      dispatch(addToCart({ productId: product.id, userId: userId ?? '' }));
-    } else {
-      message.error('Product not found');
-    }
+  if (!product) {
+    return <Typography>Loading...</Typography>;
+  }
+
+
+
+  const handleAddToCart = (quantity:number) => {
+    dispatch(addToCart({ productId: product.id1||"", userId }));
+    quantity+=1;
+    dispatch(pushCart({productId: product.id1||"", quantity: quantity}))
   };
-  
-  const handleRemoveFromCart = () => {
-    if (product) {
-      dispatch(removeFromCart({ productId: product.id, userId: userId ?? '' }));
-    } else {
-      message.error('Product not found');
-    }
+
+  const handleRemoveFromCart = (quantity:number) => {
+    dispatch(removeFromCart({ productId: product.id1||"", userId }));
+    quantity+=1;
+    dispatch(pushCart({productId: product.id1||"", quantity: quantity}))
   };
 
   return (
@@ -221,16 +224,16 @@ export const ProductDetails = ({ userId = '', token }: ProductDetailsProps) => {
           </Box>
           <Typography variant="body2" sx={descriptionStyle}>{product?.description || 'Loading description...'}</Typography>
 
-          <Box sx={buttonBoxStyle(isMobile)}>
-            {cartItem ? (
-              <Box sx={quantityContainerStyle}>
-                <IconButton onClick={handleRemoveFromCart} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
-                <Typography sx={quantityTextStyle}>{cartItem.cartQuantity}</Typography>
-                <IconButton onClick={handleAddToCart} sx={{ color: 'white' }}><AddIcon /></IconButton>
-              </Box>
-            ) : (
-              <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={handleAddToCart} />
-            )}
+            <Box sx={buttonBoxStyle(isMobile)}>
+              {product.cartQuantity ? (
+                  <Box sx={quantityContainerStyle}>
+                    <IconButton onClick={()=>handleRemoveFromCart(product.cartQuantity)} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
+                    <Typography sx={quantityTextStyle}>{product.cartQuantity}</Typography>
+                    <IconButton onClick={()=>handleAddToCart(product.cartQuantity)} sx={{ color: 'white' }}><AddIcon /></IconButton>
+                  </Box>
+              ) : (
+                  <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={()=>handleAddToCart(product.cartQuantity)} />
+              )}
 
             {isAdmin && product && (
               <Button variant="outlined" sx={editButtonStyle} onClick={handleEdit}>

@@ -5,8 +5,8 @@ import { SortDropDown } from './SortDropDown';
 import { Pagination } from './Pagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
-import { addToCart, removeFromCart, fetchAllProducts, pushCart } from '../../store/productsSlice';
-import { useNavigate } from 'react-router-dom';
+import { addToCart, removeFromCart, fetchProducts,pushCart } from '../../store/productsSlice';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const outContainerStyle = {
   backgroundColor: '#f9f9f9',
@@ -80,11 +80,13 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
   const products = useSelector((state: RootState) => state.products.products);
   const dispatch = useDispatch<AppDispatch>();
 
+
   const [sort, setSort] = useState('lastAdded');
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = isMobile ? 3 : 10;
   const totalPages = Math.ceil(products.length / productsPerPage);
   const navigate = useNavigate();
+  const cart = useSelector((state: RootState) => (userId ? state.products.cart[userId] : []) || []);
 
   useEffect(() => {
     dispatch(fetchAllProducts());

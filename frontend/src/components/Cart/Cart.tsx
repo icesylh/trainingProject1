@@ -1,12 +1,16 @@
 // components/Cart/Cart.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Button, IconButton, TextField, Divider } from '@mui/material';
-import RemoveIcon from '@mui/icons-material/Remove';
-import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
-import { addToCart, removeFromCart, removeItemFromCart, applyDiscountCode,removeDiscountCode } from '../../store/productsSlice';
+import {
+    addToCart,
+    removeFromCart,
+    removeItemFromCart,
+    applyDiscountCode,
+    removeDiscountCode, pushCart,
+} from '../../store/productsSlice';
 import { useMediaQuery, useTheme } from '@mui/material';
 import { useParams } from 'react-router-dom';
 
@@ -54,6 +58,8 @@ const Cart = ({ onClose }: CartProps) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [onClose]);
+
+
 
     const cartStyle = {
         width: isMobile ? '100vw' : '400px',
@@ -176,21 +182,30 @@ const Cart = ({ onClose }: CartProps) => {
     };
 
 
-    const handleAdd = (id: number) => {
+    const handleAdd = (id: string, quantity:number) => {
         if (userId) {
             dispatch(addToCart({ productId: id, userId }));
+            quantity+=1;
+            // @ts-ignore
+            dispatch(pushCart({productId: id, quantity: quantity}));
         }
     };
 
-    const handleRemove = (id: number) => {
+    const handleRemove = (id: string, quantity:number) => {
         if (userId) {
             dispatch(removeFromCart({ productId: id, userId }));
+            quantity-=1;
+            // @ts-ignore
+            dispatch(pushCart({productId: id, quantity: quantity}));
         }
     };
 
-    const handleRemoveItem = (id: number) => {
+    const handleRemoveItem = (id: string) => {
         if (userId) {
             dispatch(removeItemFromCart({ productId: id, userId }));
+            const quantity = 0;
+            // @ts-ignore
+            dispatch(pushCart({productId: id, quantity: quantity}));
         }
     };
 
@@ -213,9 +228,9 @@ const Cart = ({ onClose }: CartProps) => {
             </Box>
             <Box sx={cartContentStyle}>
                 {cart.map((item: Product) => (
-                    <Box key={item.id} sx={cartItemStyle}>
+                    <Box key={item.id1} sx={cartItemStyle}>
                         <Box sx={cartItemInfoStyle}>
-                            <img src={item.imageUrl} alt={item.name} style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px' }} />
+                            <img src={item.image} alt={item.name} style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px' }} />
                             <Box sx={cartItemDetailsStyle}>
                                 <Box sx={cartItemTopStyle}>
                                     <Typography variant="body1" fontWeight="bold">{item.name}</Typography>
@@ -223,11 +238,11 @@ const Cart = ({ onClose }: CartProps) => {
                                 </Box>
                                 <Box sx={cartItemActionsStyle}>
                                     <Box sx={quantityControlStyle}>
-                                        <button onClick={() => handleRemove(item.id)} style={quantityButtonStyle}>-</button>
+                                        <button onClick={() => handleRemove(item.id1||"",item.cartQuantity)} style={quantityButtonStyle}>-</button>
                                         <div style={quantityDisplayStyle}>{item.cartQuantity}</div>
-                                        <button onClick={() => handleAdd(item.id)} style={quantityButtonStyle}>+</button>
+                                        <button onClick={() => handleAdd(item.id1||"",item.cartQuantity)} style={quantityButtonStyle}>+</button>
                                     </Box>
-                                    <Button onClick={() => handleRemoveItem(item.id)} sx={removeButtonStyle} size="small">Remove</Button>
+                                    <Button onClick={() => handleRemoveItem(item.id1||"")} sx={removeButtonStyle} size="small">Remove</Button>
                                 </Box>
                             </Box>
                         </Box>
