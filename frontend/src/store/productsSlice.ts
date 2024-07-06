@@ -34,6 +34,28 @@ const api = axios.create({
   baseURL: 'http://localhost:8088',
 });
 
+// Fetch all products
+export const fetchAllProducts = createAsyncThunk('products/fetchAllProducts', async (_, { rejectWithValue }) => {
+  try {
+    const response = await api.get('/api/products');
+    console.log('Fetched products:', response.data); 
+    return response.data.map((product: any) => ({
+      ...product,
+      quantity: product.quantity,
+      inStockQuantity: product.quantity,
+      cartQuantity: 0,
+      inStock: product.quantity > 0
+    }));
+  } catch (error) {
+    console.error('Error fetching products:', error); 
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data);
+    } else {
+      return rejectWithValue('An unknown error occurred');
+    }
+  }
+});
+
 // Fetch products by user
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async (username: string, { rejectWithValue }) => {
   try {
@@ -72,6 +94,49 @@ export const fetchProductById = createAsyncThunk(
   }
 );
 
+// Fetch cart by user
+export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { rejectWithValue }) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await api.get('/api/cart', {
+      headers: {
+        authorization: `${token}`
+      }
+    });
+    return response.data.items.map((item: any) => ({
+      productId: item.productId,
+      cartQuantity: item.quantity
+    }));
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data);
+    } else {
+      return rejectWithValue('An unknown error occurred');
+    }
+  }
+});
+
+export const pushCart = createAsyncThunk('cart/pushCart', async ({productId, quantity}: {productId: string, quantity: number}, { rejectWithValue }) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await api.post('/api/cart/update', {
+      productId,
+      quantity
+    }, {
+      headers: {
+        authorization: `${token}`
+      }
+    });
+    return response.data.items;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data);
+    } else {
+      return rejectWithValue('An unknown error occurred');
+    }
+  }
+});
+
 // Add product
 export const addProduct = createAsyncThunk('products/createProduct', async (product: Product, { rejectWithValue }) => {
   try {
@@ -85,6 +150,7 @@ export const addProduct = createAsyncThunk('products/createProduct', async (prod
     }
   }
 });
+
 
 export const updateProduct = createAsyncThunk(
   'products/updateProduct',
@@ -234,6 +300,9 @@ const productsSlice = createSlice({
       .addCase(fetchProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
         state.products = action.payload;
       })
+      .addCase(fetchAllProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
+        state.products = action.payload;
+      })
       .addCase(addProduct.fulfilled, (state, action: PayloadAction<Product>) => {
         state.products.push(action.payload);
       })
@@ -254,8 +323,54 @@ const productsSlice = createSlice({
         } else {
           state.products.push(action.payload);
         }
+      })
+      .addCase(pushCart.fulfilled, (state, action) => {
+        console.log('Cart pushed successfully:', action.payload);
+    })
+    .addCase(fetchCart.fulfilled, (state, action) => {
+      const userId = action.meta.arg;
+
+      action.payload.forEach((item: any) => {
+        console.log(item.productId, item.cartQuantity);
+        //modify item in state.products
+        const p1 = state.products.find(p => p.id1 === item.productId);
+        if(p1) {
+          const update = item.cartQuantity - p1.cartQuantity;
+          p1.cartQuantity += update;
+          p1.quantity !== undefined ? p1.quantity -= update : p1.inStockQuantity! -= update;
+
+        }
+        // @ts-ignore
+        if (!state.cart[userId]) {
+          // @ts-ignore
+          state.cart[userId] = [];
+
+        }
+        //modify item in state.cart[userId]
+        // @ts-ignore
+        const p2 = state.cart[userId].find(p => p.id1 === item.productId);
+        if(p2) {
+          const update = item.cartQuantity - p2.cartQuantity;
+          p2.cartQuantity += update;
+          p2.quantity !== undefined ? p2.quantity -= update : p2.inStockQuantity! -= update;
+        } else {
+          // @ts-ignore
+          const discount: number = 0
+          // @ts-ignore
+          state.cart[userId].push({ ...p1, discount });
+        }
       });
-  }
+      state.products.forEach(p => {
+        console.log(p.name, p.cartQuantity);
+      })
+      console.log('---')
+      // @ts-ignore
+      state.cart[userId].forEach(p => {
+        console.log(p.name,p.cartQuantity);
+      })
+
+    });
+}
 });
 
 export const {

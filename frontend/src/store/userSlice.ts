@@ -5,17 +5,18 @@ interface UserState {
 }
 
 const initialState: UserState = {
-  isAdmin: true, 
+  isAdmin: false, 
 };
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setAdmin: (state, action: PayloadAction<boolean>) => {
+    setAdmin: (state, action: PayloadAction<boolean>): void => {
       state.isAdmin = action.payload;
     },
   },
 });
 
+export const { setAdmin } = userSlice.actions;
 export default userSlice.reducer;

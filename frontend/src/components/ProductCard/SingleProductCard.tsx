@@ -1,8 +1,7 @@
 import { Box, Typography, Button, IconButton, SvgIcon } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface ProductCardProps {
   id1: string;
@@ -116,14 +115,18 @@ export const SingleProductCard = ({
   isAdmin,
   inStock,
 }: ProductCardProps) => {
-  const { userId } = useParams<{ userId: string }>();
+  const { userId, token = ''} = useParams<{ userId: string; token: string }>();
+
+
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    if (userId) {
-      navigate(`/user/${userId}/product/${id1}`);
+    if (userId && token && id1) {
+      localStorage.setItem('navigationInfo', JSON.stringify({ userId, token, productId: id1 }));
+      navigate(`/user/${userId}/${token}/product/${id1}`);
     }
   };
+  
 
   const formattedPrice = price ? price.toFixed(2) : '0.00';
 

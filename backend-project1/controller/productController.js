@@ -36,6 +36,15 @@ exports.createProduct = async (req, res, next) => {
   }
 };
 
+exports.getAllProducts = async (_, res, next) => {
+  try {
+    const products = await Product.find();
+    res.status(200).json(products);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.getProductsByUserId = async (req, res, next) => {
   try {
     const email = req.params.userId;

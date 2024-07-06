@@ -50,8 +50,8 @@ router.post('/sendCode', (req, res) => {
     let options = {
       from: 'icesylh@gmail.com',
       to: account,
-      subject: 'Activation code', //邮件主题
-      text: 'Your verification code:' + code, // 邮件正文
+      subject: 'Activation code', 
+      text: 'Your verification code:' + code, 
       html: `
             <h1>Hi, your email has been sent!</h1>,<a href="http://localhost:3000/forgot?id=${account}&code=${code}">点击修改密码</a>`
     }

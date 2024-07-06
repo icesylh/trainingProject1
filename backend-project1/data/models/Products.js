@@ -9,7 +9,6 @@ const productSchema = new Schema(
     price: { type: Number, required: true, default: 0 },
     quantity: { type: Number, required: true, default: 0 },
     image: { type: String, required: true },
-    seller: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     id1: { type: mongoose.Schema.Types.ObjectId, default: function() { return this._id; } },
   },
   {

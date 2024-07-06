@@ -3,13 +3,17 @@ import { Button, Form, Input, message, Select } from 'antd';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import { CloseOutlined } from '@ant-design/icons';
-import { useNavigate, Link } from 'react-router-dom'; // Updated here
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setAdmin } from '../store/userSlice';
+
 const { Option } = Select;
 
 const Register = () => {
   const [form] = Form.useForm();
-  const navigate = useNavigate(); // Updated here
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onFinish = ({ password, email, type }) => {
     axios.post('http://localhost:8088/User/Register', {
@@ -20,8 +24,9 @@ const Register = () => {
     .then((res) => {
       if (res.data.Code === 200) {
         message.success(res.data.Msg);
+        dispatch(setAdmin(type)); 
         setTimeout(() => {
-          navigate('/'); // Updated here
+          navigate('/');
         }, 1000);
       } else {
         message.error(res.data.Msg);
@@ -84,4 +89,3 @@ const Register = () => {
 };
 
 export default Register;
-

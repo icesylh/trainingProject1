@@ -5,8 +5,8 @@ import { SortDropDown } from './SortDropDown';
 import { Pagination } from './Pagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
-import { addToCart, removeFromCart, fetchProducts } from '../../store/productsSlice';
-import { useNavigate, useParams } from 'react-router-dom';
+import { addToCart, removeFromCart, fetchAllProducts, pushCart } from '../../store/productsSlice';
+import { useNavigate } from 'react-router-dom';
 
 const outContainerStyle = {
   backgroundColor: '#f9f9f9',
@@ -73,8 +73,7 @@ const paginationStyle = (isMobile: boolean) => ({
   boxSizing: 'border-box',
 });
 
-export const ProductCard = () => {
-  const { userId } = useParams<{ userId: string }>();
+export const ProductCard = ({ userId, token }: { userId: string, token: string }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isAdmin = useSelector((state: RootState) => state.user.isAdmin);
@@ -88,10 +87,8 @@ export const ProductCard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (userId) {
-      dispatch(fetchProducts(userId));
-    }
-  }, [dispatch, userId]);
+    dispatch(fetchAllProducts());
+  }, [dispatch]);
 
   useEffect(() => {
     handleSortChange({ target: { value: sort } } as SelectChangeEvent<string>);
@@ -115,26 +112,33 @@ export const ProductCard = () => {
     setCurrentPage(page);
   };
 
-  const handleAdd = (id: number) => {
+  const handleAdd = (id: string, quantity:number) => {
     dispatch(addToCart({ productId: id, userId: userId! }));
+    quantity+=1;
+    dispatch(pushCart({productId: id, quantity: quantity}))
   };
 
-  const handleRemove = (id: number) => {
+  const handleRemove = (id: string, quantity:number) => {
     dispatch(removeFromCart({ productId: id, userId: userId! }));
+    quantity-=1;
+    dispatch(pushCart({productId: id, quantity: quantity}))
   };
+
 
   const handleAddProduct = () => {
-    navigate(`/user/${userId}/create-product`);
+    navigate(`/user/${userId}/${token}/create-product`);
   };
 
   const handleEdit = (productId: string) => {
-    navigate(`/user/${userId}/create-product/${productId}`);
+    navigate(`/user/${userId}/${token}/create-product/${productId}`);
   };
 
   const displayedProducts = sortedProducts.slice(
     (currentPage - 1) * productsPerPage,
     currentPage * productsPerPage
   );
+
+  console.log('Rendering ProductCard. Is admin:', isAdmin);
 
   return (
     <Box sx={outContainerStyle}>
@@ -144,18 +148,18 @@ export const ProductCard = () => {
           <SortDropDown isAdmin={isAdmin} value={sort} onChange={handleSortChange} onAddProduct={handleAddProduct} />
         </Box>
       </Box>
-      <Box sx={productsInnerContainerStyle}>
+      <Box sx={productsInnerContainerStyle} key={Math.random()}>
         <Box sx={gridContainerStyle(isMobile)}>
           {displayedProducts.map((product) => (
-            <Box key={product.id} sx={gridItemStyle(isMobile)}>
+            <Box key={product.id1} sx={gridItemStyle(isMobile)}>
               <SingleProductCard
                 id1={product.id1|| ""}
                 image={product.image ?? ''}
                 namee={product.name}
                 price={product.price}
                 cartQuantity={product.cartQuantity}
-                onAdd={() => handleAdd(product.id)}
-                onRemove={() => handleRemove(product.id)}
+                onAdd={() => handleAdd(product.id1|| "", product.cartQuantity)}
+                onRemove={() => handleRemove(product.id1|| "", product.cartQuantity)}
                 onEdit={() => handleEdit(product.id1|| "")}
                 isAdmin={isAdmin}
                 inStock={product.inStock}

@@ -1,6 +1,7 @@
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { CreateProductForm } from './createProductForm';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const productFormContainerStyle = (isMobile: boolean) => ({
   display: 'flex',
@@ -27,7 +28,19 @@ const headerTextStyle = (isMobile: boolean) => ({
 export const ProductForm = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { userId, productId } = useParams<{ userId: string; productId?: string }>();
+  const { userId, token, productId } = useParams<{ userId: string; token?: string; productId?: string }>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) {
+      console.error('Token is missing');
+      navigate('/login');
+    }
+  }, [token, navigate]);
+
+  if (!token) {
+    return null;
+  }
 
   return (
     <Box sx={productFormContainerStyle(isMobile)}>
@@ -36,9 +49,7 @@ export const ProductForm = () => {
           Create Product
         </Typography>
       </Box>
-      <CreateProductForm userId={userId!} productId={productId} isMobile={isMobile} />
+      <CreateProductForm userId={userId!} token={token} productId={productId} isMobile={isMobile} />
     </Box>
   );
 };
-export { CreateProductForm };
-

@@ -56,7 +56,7 @@ import { useNavigate } from 'react-router-dom';  // 更新这里
 const Header = () => {
   const { Search } = Input;
   const navigate = useNavigate();  // 使用 useNavigate 替换 useHistory
-  const [token] = useState(localStorage.getItem('token'));
+  const [token] = useState(localStorage.getItem('email'));
 
   return (
     <div className="header">

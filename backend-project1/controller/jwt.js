@@ -21,11 +21,11 @@ module.exports = {
   decrypt,
   encrypt,
   check: (req, res, next) => {
-    // 全局检测token
-
     try {
       let token = req.headers.authorization;
+      console.log("Received token:", token); 
       let id = decrypt(token);
+      console.log("Decrypted token id:", id); 
       User.findById(id, (err, doc) => {
         if (err) res.status(500).send(err);
         if (doc) {
@@ -34,6 +34,7 @@ module.exports = {
         } else res.send({ Code: 401, Msg: "No login status" });
       });
     } catch (error) {
+      console.error("Token validation failed:", error); 
       res.send({ Code: 401, Msg: "Token Failure" });
     }
   },

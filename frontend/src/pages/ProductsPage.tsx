@@ -1,11 +1,12 @@
-import { Box } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, CircularProgress } from '@mui/material';
 import { ProductCard } from '../components/ProductCard/ProductCard';
-import Header from '../components/Header'; // Ensure this imports the correct Header component you want to use
-import Footer from '../components/Footer'; // Ensure this imports the correct Footer component you provided
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import Cart from '../components/Cart/Cart';
 import CartIcon from '../components/Cart/CartIcon';
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { message } from 'antd';
 
 const outContainerStyle = {
   backgroundColor: '#f9f9f9',
@@ -26,26 +27,49 @@ const headerStyle = {
 };
 
 const ProductsPage = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const { userId = '', token = '' } = useParams<{ userId: string; token: string }>();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  //Todo:解决username和token不匹配的问题
+  //前端用public key解密
+   
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken && storedToken === token) {
+      setLoading(false);
+    } else {
+      message.error('Invalid token, please log in again.');
+      navigate('/');
+    }
+  }, [token, navigate]);
 
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };
 
-    // TODO: Fix header
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-      <>
-        <Box sx={headerStyle}>
-          <Header />
-          {userId && <CartIcon onClick={toggleCart} userId={userId} />}
-        </Box>
-        <Box sx={outContainerStyle}>
-          <ProductCard />
-        </Box>
-        {isCartOpen && <Cart onClose={toggleCart} />}
-        <Footer />
-      </>
+    <>
+      <Box sx={headerStyle}>
+        <Header />
+        {userId && <CartIcon onClick={toggleCart} userId={userId} />}
+      </Box>
+      <Box sx={outContainerStyle}>
+        <ProductCard userId={userId} token={token} />
+      </Box>
+      {isCartOpen && <Cart onClose={toggleCart} />}
+      <Footer />
+    </>
   );
 };
 
