@@ -5,7 +5,7 @@ import { SortDropDown } from './SortDropDown';
 import { Pagination } from './Pagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
-import { addToCart, removeFromCart, fetchProducts,pushCart } from '../../store/productsSlice';
+import { addToCart, removeFromCart, fetchAllProducts,pushCart } from '../../store/productsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const outContainerStyle = {

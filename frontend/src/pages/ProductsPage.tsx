@@ -54,6 +54,14 @@ const ProductsPage = () => {
     setIsCartOpen(!isCartOpen);
   };
 
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (userId) {
+      // @ts-ignore
+      dispatch(fetchCart(userId));
+    }
+  }, [dispatch, userId]);
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -62,13 +70,7 @@ const ProductsPage = () => {
     );
   }
 
-  const dispatch = useDispatch();
-  useEffect(() => {
-      if (userId) {
-          // @ts-ignore
-          dispatch(fetchCart(userId));
-      }
-  }, [dispatch, userId]);
+
 
   return (
     <>

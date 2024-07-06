@@ -370,16 +370,7 @@ const productsSlice = createSlice({
         })
 
       });
-      state.products.forEach(p => {
-        console.log(p.name, p.cartQuantity);
-      })
-      console.log('---')
-      // @ts-ignore
-      state.cart[userId].forEach(p => {
-        console.log(p.name,p.cartQuantity);
-      })
 
-    });
 }
 });
 

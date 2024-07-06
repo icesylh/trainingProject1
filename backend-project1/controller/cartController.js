@@ -2,9 +2,9 @@ const Cart = require('../data/models/cart');
 
 exports.getCart = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.user });
+        let cart = await Cart.findOne({ userId: req.user });
         if (!cart) {
-            return res.status(404).json({ message: 'Cart not found' });
+            cart = new Cart({ userId: req.user, items: [] });
         }
         res.status(200).json(cart);
     } catch (error) {
@@ -36,9 +36,9 @@ exports.updateCartItem = async (req, res) => {
     const { productId, quantity } = req.body;
     if(quantity === 0){
         try {
-            const cart = await Cart.findOne({ userId: req.user });
+            let cart = await Cart.findOne({ userId: req.user });
             if (!cart) {
-                return res.status(404).json({ message: 'Cart not found' });
+                cart = new Cart({ userId: req.user, items: [] });
             }
             cart.items = cart.items.filter(item => item.productId.toString() !== productId);
             await cart.save();
@@ -48,9 +48,9 @@ exports.updateCartItem = async (req, res) => {
         }
     } else {
         try {
-            const cart = await Cart.findOne({ userId: req.user });
+            let cart = await Cart.findOne({ userId: req.user });
             if (!cart) {
-                return res.status(404).json({ message: 'Cart not found' });
+                cart = new Cart({ userId: req.user, items: [] });
             }
             const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
             if (itemIndex > -1) {
