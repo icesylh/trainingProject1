@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import { Box, Typography, Button, useMediaQuery, useTheme, IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
@@ -10,6 +10,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import { message } from 'antd';
+import {debounce} from "lodash";
 
 const detailOuterContainerBox = {
   display: 'flex',
@@ -181,23 +182,28 @@ export const ProductDetails = ({ userId = '', token }: ProductDetailsProps) => {
       navigate(`/user/${userId}/${token}/create-product/${product.id1}`);
     }
   };
+  const debouncedPushCart = useCallback(
+      debounce((id: string, quantity: number) => {
+        dispatch(pushCart({ productId: id, quantity }));
+      }, 300),
+      [dispatch]
+  );
 
   if (!product) {
     return <Typography>Loading...</Typography>;
   }
 
 
-
   const handleAddToCart = (quantity:number) => {
     dispatch(addToCart({ productId: product.id1||"", userId }));
     quantity+=1;
-    dispatch(pushCart({productId: product.id1||"", quantity: quantity}))
+    debouncedPushCart(product.id1||"", quantity);
   };
 
   const handleRemoveFromCart = (quantity:number) => {
     dispatch(removeFromCart({ productId: product.id1||"", userId }));
     quantity+=1;
-    dispatch(pushCart({productId: product.id1||"", quantity: quantity}))
+    debouncedPushCart(product.id1||"", quantity);
   };
 
   return (

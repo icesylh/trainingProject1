@@ -1,5 +1,5 @@
 // components/Cart/Cart.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import { Box, Typography, Button, IconButton, TextField, Divider } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useSelector, useDispatch } from 'react-redux';
@@ -13,6 +13,7 @@ import {
 } from '../../store/productsSlice';
 import { useMediaQuery, useTheme } from '@mui/material';
 import { useParams } from 'react-router-dom';
+import {debounce} from "lodash";
 
 interface Product {
     id: number;
@@ -181,13 +182,20 @@ const Cart = ({ onClose }: CartProps) => {
         fontWeight: 'bold',
     };
 
+    const debouncedPushCart = useCallback(
+        debounce((id: string, quantity: number) => {
+            // @ts-ignore
+            dispatch(pushCart({ productId: id, quantity }));
+        }, 300),
+        [dispatch]
+    );
+
 
     const handleAdd = (id: string, quantity:number) => {
         if (userId) {
             dispatch(addToCart({ productId: id, userId }));
             quantity+=1;
-            // @ts-ignore
-            dispatch(pushCart({productId: id, quantity: quantity}));
+            debouncedPushCart(id, quantity);
         }
     };
 
@@ -195,8 +203,7 @@ const Cart = ({ onClose }: CartProps) => {
         if (userId) {
             dispatch(removeFromCart({ productId: id, userId }));
             quantity-=1;
-            // @ts-ignore
-            dispatch(pushCart({productId: id, quantity: quantity}));
+            debouncedPushCart(id, quantity);
         }
     };
 
@@ -204,8 +211,7 @@ const Cart = ({ onClose }: CartProps) => {
         if (userId) {
             dispatch(removeItemFromCart({ productId: id, userId }));
             const quantity = 0;
-            // @ts-ignore
-            dispatch(pushCart({productId: id, quantity: quantity}));
+            debouncedPushCart(id, quantity);
         }
     };
 

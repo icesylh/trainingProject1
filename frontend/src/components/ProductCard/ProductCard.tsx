@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import { Box, Typography, useMediaQuery, useTheme, SelectChangeEvent } from '@mui/material';
 import { SingleProductCard } from './SingleProductCard';
 import { SortDropDown } from './SortDropDown';
@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { addToCart, removeFromCart, fetchAllProducts,pushCart } from '../../store/productsSlice';
 import { useNavigate, useParams } from 'react-router-dom';
+import { debounce } from 'lodash';
 
 const outContainerStyle = {
   backgroundColor: '#f9f9f9',
@@ -114,16 +115,23 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
     setCurrentPage(page);
   };
 
+  const debouncedPushCart = useCallback(
+      debounce((id: string, quantity: number) => {
+        dispatch(pushCart({ productId: id, quantity }));
+      }, 300),
+      [dispatch]
+  );
+
   const handleAdd = (id: string, quantity:number) => {
     dispatch(addToCart({ productId: id, userId: userId! }));
     quantity+=1;
-    dispatch(pushCart({productId: id, quantity: quantity}))
+    debouncedPushCart(id, quantity);
   };
 
   const handleRemove = (id: string, quantity:number) => {
     dispatch(removeFromCart({ productId: id, userId: userId! }));
     quantity-=1;
-    dispatch(pushCart({productId: id, quantity: quantity}))
+    debouncedPushCart(id, quantity);
   };
 
 
