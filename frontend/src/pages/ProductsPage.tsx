@@ -22,6 +22,8 @@ const outContainerStyle = {
 };
 
 const headerStyle = {
+  backgroundColor: '#000',
+  color: '#fff',
   width: '100%',
   display: 'flex',
   justifyContent: 'space-between',
