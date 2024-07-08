@@ -5,13 +5,18 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const fs = require('fs');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const productRoutes = require('./routes/productRoutes');
-const cartRoutes = require('./routes/cartRoutes'); // 添加购物车路由
-const jwtController = require('./controller/jwt'); // 确保有身份验证中间件
+const cartRoutes = require('./routes/cartRoutes'); 
+const jwtController = require('./controller/jwt'); 
+const authRoutes = require('./routes/auth'); 
 
 require('./data/db');
 
 const app = express();
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
 
 app.use(cors());
 
@@ -28,6 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 路由设置
 app.use('/api/products', productRoutes);
 app.use('/api/cart', jwtController.check, cartRoutes); // 添加购物车路由并应用身份验证中间件
+app.use('/api', authRoutes); 
 
 const routes = fs.readdirSync(path.join(__dirname, 'routes'));
 routes.forEach((v) => {

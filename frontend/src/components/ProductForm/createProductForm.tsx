@@ -160,7 +160,6 @@ export const CreateProductForm = ({userId, isMobile, productId, token }: CreateP
   }, [imageUrl]);
 
   useEffect(() => {
-    console.log('Fetching product by ID:', id);
     if (id && !product) {
       dispatch(fetchProductById(id));
     }
@@ -219,14 +218,17 @@ export const CreateProductForm = ({userId, isMobile, productId, token }: CreateP
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('File selected:', file);
       const reader = new FileReader();
       reader.onloadend = () => {
+        console.log('File read as DataURL:', reader.result);
         setImagePreview(reader.result as string);
         setValue('imageUrl', reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
+  
 
   return (
       <Box sx={outerBoxStyle(isMobile)}>

@@ -3,15 +3,17 @@ const fs = require("fs");
 const path = require("path");
 const User = require("../data/models/User");
 
-const encrypt = data => {
-  // 加密
+const encrypt = (data) => {
   const privateKey = fs.readFileSync(path.join(__dirname, "../keys/rsa_private_key.pem"));
-  const tk = jwt.sign(data, privateKey, { algorithm: "RS256" });
+  const payload = {
+    userId: data.userId,
+    email: data.email  
+  };
+  const tk = jwt.sign(payload, privateKey, { algorithm: "RS256" });
   return tk;
 };
 
-const decrypt = tk => {
-  // 解密
+const decrypt = (tk) => {
   const publicKey = fs.readFileSync(path.join(__dirname, "../keys/rsa_public_key.pem"));
   const result = jwt.verify(tk, publicKey);
   return result;
@@ -20,16 +22,40 @@ const decrypt = tk => {
 module.exports = {
   decrypt,
   encrypt,
+  validateToken: (req, res) => {
+    const { token, userId } = req.body;
+    console.log("Received token for validation:", token);
+    console.log("Received userId for validation:", userId);
+
+    try {
+      const decoded = decrypt(token);
+      console.log("Decoded token:", decoded);
+
+      if (decoded.email === userId) {
+        console.log("Token and userId match");
+        res.json({ isValid: true });
+      } else {
+        console.log("Token and userId do not match");
+        res.json({ isValid: false });
+      }
+    } catch (error) {
+      console.error("Token validation failed:", error);
+      res.status(401).json({ isValid: false, message: "Token validation failed" });
+    }
+  },
   check: (req, res, next) => {
     try {
       let token = req.headers.authorization;
       console.log("Received token:", token); 
-      let id = decrypt(token);
-      console.log("Decrypted token id:", id); 
-      User.findById(id, (err, doc) => {
+      let decoded = decrypt(token);
+      console.log("Decrypted token:", decoded); 
+      let email = decoded.email; 
+      console.log("Decrypted email:", email);
+
+      User.findOne({ email }, (err, doc) => {
         if (err) res.status(500).send(err);
         if (doc) {
-          req.user = id;
+          req.user = email;
           next();
         } else res.send({ Code: 401, Msg: "No login status" });
       });

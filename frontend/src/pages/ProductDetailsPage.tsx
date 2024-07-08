@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import CartIcon from "../components/Cart/CartIcon";
 import Cart from "../components/Cart/Cart";
 import { message } from 'antd';
+import axios from 'axios';
 
 const outContainerStyle = {
   backgroundColor: '#f9f9f9',
@@ -33,12 +34,29 @@ const ProductDetailsPage = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const navigate = useNavigate();
 
+  const validateTokenAndUserId = async (token: string, userId: string) => {
+    try {
+      const response = await axios.post('http://localhost:8088/api/validate-token', { token, userId });
+      return response.data.isValid;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return false;
+    }
+  };
+
+
   useEffect(() => {
-    const validateToken = () => {
+    const validateToken = async () => {
       const storedToken = localStorage.getItem('token');
       if (!storedToken || storedToken !== token) {
         message.error('Invalid token, please log in again.');
         navigate('/');
+      } else {
+        const isValid = await validateTokenAndUserId(storedToken, userId);
+        if (!isValid) {
+          message.error('User ID and token do not match, please log in again.');
+          navigate('/');
+        }
       }
     };
 
@@ -54,7 +72,9 @@ const ProductDetailsPage = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [token, navigate]);
+  }, [token, userId, navigate]);
+
+
 
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);

@@ -10,6 +10,7 @@ import { message } from 'antd';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { fetchCart } from '../store/productsSlice';
+import axios from 'axios';
 
 const outContainerStyle = {
   backgroundColor: '#f9f9f9',
@@ -37,19 +38,32 @@ const ProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  //Todo:解决username和token不匹配的问题
-  //前端用public key解密
-   
+  const validateTokenAndUserId = async (token: string, userId: string) => {
+    try {
+      const response = await axios.post('http://localhost:8088/api/validate-token', { token, userId });
+      return response.data.isValid;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return false;
+    }
+  };
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken && storedToken === token) {
-      setLoading(false);
+      validateTokenAndUserId(storedToken, userId).then((isValid) => {
+        if (!isValid) {
+          message.error('User ID and token do not match, please log in again.');
+          navigate('/');
+        } else {
+          setLoading(false);
+        }
+      });
     } else {
       message.error('Invalid token, please log in again.');
       navigate('/');
     }
-  }, [token, navigate]);
+  }, [token, userId, navigate]);
 
 
   const toggleCart = () => {
