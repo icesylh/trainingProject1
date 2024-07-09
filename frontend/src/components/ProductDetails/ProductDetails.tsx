@@ -4,12 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { CustomButton } from '../Button/CustomButton';
 import { StockTag } from './StockTag';
-import {fetchProductById, pushCart} from '../../store/productsSlice';
+import { pushCart } from '../../store/productsSlice';
 import { addToCart, removeFromCart } from '../../store/productsSlice';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
-import { message } from 'antd';
 import {debounce} from "lodash";
 
 const detailOuterContainerBox = {

@@ -27,6 +27,9 @@ const activeButtonStyle = {
   ...buttonStyle,
   backgroundColor: '#5048E5',
   color: 'white',
+  '&:hover': {
+    backgroundColor: '#5048E5',
+  },
 }
 
 

@@ -131,14 +131,14 @@ export const SingleProductCard = ({
   const formattedPrice = price ? price.toFixed(2) : '0.00';
 
   const handleAddClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 防止事件冒泡
+    e.stopPropagation(); 
     if (inStock) {
       onAdd();
     }
   };
 
   const handleRemoveClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 防止事件冒泡
+    e.stopPropagation(); 
     if (cartQuantity > 0) {
       onRemove();
     }

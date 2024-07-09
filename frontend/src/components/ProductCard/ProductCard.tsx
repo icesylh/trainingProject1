@@ -6,7 +6,7 @@ import { Pagination } from './Pagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { addToCart, removeFromCart, fetchAllProducts,pushCart } from '../../store/productsSlice';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 
 const outContainerStyle = {
@@ -87,9 +87,12 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
   const productsPerPage = isMobile ? 3 : 10;
   const totalPages = Math.ceil(products.length / productsPerPage);
   const navigate = useNavigate();
-  const cart = useSelector((state: RootState) => (userId ? state.products.cart[userId] : []) || []);
 
   useEffect(() => {
+    const storedPage = localStorage.getItem('currentPage');
+    if (storedPage) {
+      setCurrentPage(Number(storedPage));
+    }
     dispatch(fetchAllProducts());
   }, [dispatch]);
 
@@ -113,6 +116,7 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    localStorage.setItem('currentPage', page.toString());
   };
 
   const debouncedPushCart = useCallback(
@@ -160,8 +164,8 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
       </Box>
       <Box sx={productsInnerContainerStyle} key={Math.random()}>
         <Box sx={gridContainerStyle(isMobile)}>
-          {displayedProducts.map((product) => (
-            <Box key={product.id1} sx={gridItemStyle(isMobile)}>
+          {displayedProducts.map((product, index) => (
+            <Box key={`${product.id1}-${index}`} sx={gridItemStyle(isMobile)}>
               <SingleProductCard
                 id1={product.id1|| ""}
                 image={product.image ?? ''}

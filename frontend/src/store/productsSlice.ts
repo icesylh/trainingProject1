@@ -42,7 +42,6 @@ export const fetchAllProducts = createAsyncThunk('products/fetchAllProducts', as
     return response.data.map((product: any) => ({
       ...product,
       quantity: product.quantity,
-      inStockQuantity: product.quantity,
       cartQuantity: 0,
       inStock: product.quantity > 0
     }));
@@ -63,7 +62,6 @@ export const fetchProducts = createAsyncThunk('products/fetchProducts', async (u
     return response.data.map((product: any) => ({
       ...product,
       quantity: product.quantity,
-      inStockQuantity: product.quantity,
       cartQuantity: 0, // Ensure cartQuantity is initialized
       inStock: product.quantity > 0 // Determine if the product is in stock
     }));
@@ -81,7 +79,7 @@ export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
   async (productId: string, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/api/products/${productId}`);
+      const response = await api.put(`/api/products/${productId}`);
       console.log('Fetched product data:', response.data);
       return response.data;
     } catch (error) {
@@ -221,6 +219,7 @@ const productsSlice = createSlice({
           cartProduct.quantity !== undefined ? cartProduct.quantity = product.quantity : cartProduct.inStockQuantity = product.inStockQuantity;
           cartProduct.discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
         }
+        product.inStock = (product.quantity !== undefined ? product.quantity : product.inStockQuantity!) > 0;
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
@@ -249,6 +248,7 @@ const productsSlice = createSlice({
             cartProduct.discount = state.discountCode && discountCodes[state.discountCode] ? discountCodes[state.discountCode] : 0;
           }
         }
+        product.inStock = (product.quantity !== undefined ? product.quantity : product.inStockQuantity!) > 0;
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
@@ -262,6 +262,7 @@ const productsSlice = createSlice({
         product.quantity !== undefined ? product.quantity += product.cartQuantity : product.inStockQuantity! += product.cartQuantity;
         product.cartQuantity = 0;
         state.cart[userId] = state.cart[userId].filter((p) => p.id1 !== productId);
+        product.inStock = (product.quantity !== undefined ? product.quantity : product.inStockQuantity!) > 0;
         localStorage.setItem('cart', JSON.stringify(state.cart));
       }
     },
@@ -311,6 +312,7 @@ const productsSlice = createSlice({
         const existingProduct = state.products.find(product => product.id1 === updatedProduct.id1 || product.id === updatedProduct.id);
         if (existingProduct) {
           Object.assign(existingProduct, updatedProduct);
+          existingProduct.inStock = (existingProduct.quantity !== undefined ? existingProduct.quantity : existingProduct.inStockQuantity!) > 0;
         }
       })
       .addCase(removeProduct.fulfilled, (state, action: PayloadAction<string>) => {
@@ -338,7 +340,7 @@ const productsSlice = createSlice({
             const update = item.cartQuantity - p1.cartQuantity;
             p1.cartQuantity += update;
             p1.quantity !== undefined ? p1.quantity -= update : p1.inStockQuantity! -= update;
-
+            p1.inStock = (p1.quantity !== undefined ? p1.quantity : p1.inStockQuantity!) > 0;
           }
           // @ts-ignore
           if (!state.cart[userId]) {
