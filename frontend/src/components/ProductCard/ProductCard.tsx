@@ -111,6 +111,12 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
     setSort(event.target.value);
   };
 
+  console.log("-------Products--------- ")
+  products.forEach((product) => {
+    console.log(product.name, product.cartQuantity)
+  })
+  console.log("!!!!!!!Products!!!!!!!!! ")
+
   const sortedProducts = [...products].sort((a, b) => {
     if (sort === 'priceLowToHigh') {
       return a.price - b.price;
@@ -134,14 +140,14 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
   );
 
   const handleAdd = (id: string, quantity:number) => {
-    dispatch(addToCart({ productId: id, userId: userId! }));
     quantity+=1;
+    dispatch(addToCart({ productId: id, userId: userId!, quantity: quantity }));
     debouncedPushCart(id, quantity);
   };
 
   const handleRemove = (id: string, quantity:number) => {
-    dispatch(removeFromCart({ productId: id, userId: userId! }));
     quantity-=1;
+    dispatch(removeFromCart({ productId: id, userId: userId!,quantity }));
     debouncedPushCart(id, quantity);
   };
 
@@ -154,14 +160,23 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
     navigate(`/user/${userId}/${token}/create-product/${productId}`);
   };
 
+  // console.log("-------sortedProducts--------- ")
+  // sortedProducts.forEach((product) => {
+  //   console.log(product.name, product.cartQuantity)
+  // })
+  // console.log("!!!!!!!sortedProducts!!!!!!!!! ")
+
   const displayedProducts = sortedProducts.slice(
     (currentPage - 1) * productsPerPage,
     currentPage * productsPerPage
   );
 
-  console.log('Rendering ProductCard. Is admin:', isAdmin);
+  //console.log('Rendering ProductCard. Is admin:', isAdmin);
 
   const cart = useSelector((state: RootState) => (userId ? state.products.cart[userId] : []) || []);
+  // displayedProducts.forEach((product) => {
+  //   console.log(product.name, product.cartQuantity)
+  // })
 
   return (
     <Box sx={outContainerStyle}>

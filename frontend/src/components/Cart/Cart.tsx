@@ -193,16 +193,16 @@ const Cart = ({ onClose }: CartProps) => {
 
     const handleAdd = (id: string, quantity:number) => {
         if (userId) {
-            dispatch(addToCart({ productId: id, userId }));
             quantity+=1;
+            dispatch(addToCart({ productId: id, userId ,quantity},));
             debouncedPushCart(id, quantity);
         }
     };
 
     const handleRemove = (id: string, quantity:number) => {
         if (userId) {
-            dispatch(removeFromCart({ productId: id, userId }));
             quantity-=1;
+            dispatch(removeFromCart({ productId: id, userId,quantity }));
             debouncedPushCart(id, quantity);
         }
     };

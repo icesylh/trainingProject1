@@ -199,14 +199,14 @@ export const ProductDetails = ({ userId = '', token }: ProductDetailsProps) => {
 
 
   const handleAddToCart = (quantity:number) => {
-    dispatch(addToCart({ productId: product.id1||"", userId }));
     quantity+=1;
+    dispatch(addToCart({ productId: product.id1||"", userId, quantity }));
     debouncedPushCart(product.id1||"", quantity);
   };
 
   const handleRemoveFromCart = (quantity:number) => {
-    dispatch(removeFromCart({ productId: product.id1||"", userId }));
-    quantity+=1;
+    quantity-=1;
+    dispatch(removeFromCart({ productId: product.id1||"", userId,quantity }));
     debouncedPushCart(product.id1||"", quantity);
   };
 

@@ -25,7 +25,7 @@ interface ProductsState {
 }
 
 const initialState: ProductsState = {
-  products: [],
+  products: JSON.parse(localStorage.getItem('products') || '[]'),
   cart: JSON.parse(localStorage.getItem('cart') || '{}'),
   discountCode: null,
 };
@@ -188,10 +188,11 @@ export const removeProduct = createAsyncThunk('products/removeProduct', async (p
 interface AddToCartPayload {
   productId: string | number;
   userId: string;
+  quantity: number;
 }
 
 const discountCodes: { [key: string]: number } = {
-  '20OFF': 20,
+  '20DOLLAROFF': 20,
   '30OFF': 30,
 };
 
@@ -200,11 +201,12 @@ const productsSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
-      const { productId, userId } = action.payload;
+      const { productId, userId,quantity } = action.payload;
       const product = state.products.find((p) => p.id1 === productId);
       if (product && (product.quantity || product.inStockQuantity) && (product.quantity! > 0 || product.inStockQuantity! > 0)) {
-        product.cartQuantity += 1;
-        product.quantity !== undefined ? product.quantity -= 1 : product.inStockQuantity! -= 1;
+        const difference = quantity - product.cartQuantity;
+        product.cartQuantity += difference;
+        product.quantity !== undefined ? product.quantity -= difference : product.inStockQuantity! -= difference;
 
         if (!state.cart[userId]) {
           state.cart[userId] = [];
@@ -225,13 +227,15 @@ const productsSlice = createSlice({
     },
     removeFromCart: (
       state,
-      action: PayloadAction<{ productId: string | number; userId: string }>
+      action: PayloadAction<{ productId: string | number; userId: string; quantity: number }>
     ) => {
-      const { productId, userId } = action.payload;
+      console.log("remove");
+      const { productId, userId,quantity } = action.payload;
       const product = state.products.find((p) => p.id1 === productId);
       if (product && product.cartQuantity > 0) {
-        product.cartQuantity -= 1;
-        product.quantity !== undefined ? product.quantity += 1 : product.inStockQuantity! += 1;
+        const difference = quantity - product.cartQuantity;
+        product.cartQuantity += difference;
+        product.quantity !== undefined ? product.quantity -= difference : product.inStockQuantity! -= difference;
         const cartProductIndex = state.cart[userId].findIndex(
           (p) => p.id1 === productId || p.id === productId
         );
@@ -303,6 +307,7 @@ const productsSlice = createSlice({
       })
       .addCase(fetchAllProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
         state.products = action.payload;
+        localStorage.setItem('products', JSON.stringify(state.products));
       })
       .addCase(addProduct.fulfilled, (state, action: PayloadAction<Product>) => {
         state.products.push(action.payload);
@@ -361,14 +366,14 @@ const productsSlice = createSlice({
             state.cart[userId].push({ ...p1, discount });
           }
         });
-        state.products.forEach(p => {
-          console.log(p.name, p.cartQuantity);
-        })
-        console.log('---')
-        // @ts-ignore
-        state.cart[userId].forEach(p => {
-          console.log(p.name,p.cartQuantity);
-        })
+        // state.products.forEach(p => {
+        //   console.log(p.name, p.cartQuantity);
+        // })
+        // console.log('---')
+        // // @ts-ignore
+        // state.cart[userId].forEach(p => {
+        //   console.log(p.name,p.cartQuantity);
+        // })
 
       });
 
