@@ -362,14 +362,6 @@ const productsSlice = createSlice({
             state.cart[userId].push({ ...p1, discount });
           }
         });
-        state.products.forEach(p => {
-          console.log(p.name, p.cartQuantity);
-        })
-        console.log('---')
-        // @ts-ignore
-        state.cart[userId].forEach(p => {
-          console.log(p.name,p.cartQuantity);
-        })
 
       });
 
