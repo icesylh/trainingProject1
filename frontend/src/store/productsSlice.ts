@@ -331,9 +331,10 @@ const productsSlice = createSlice({
       })
       .addCase(fetchCart.fulfilled, (state, action) => {
         const userId = action.meta.arg;
+        console.log("fetch")
 
         action.payload.forEach((item: any) => {
-          console.log(item.productId, item.cartQuantity);
+
           //modify item in state.products
           const p1 = state.products.find(p => p.id1 === item.productId);
           if(p1) {
@@ -362,6 +363,14 @@ const productsSlice = createSlice({
             state.cart[userId].push({ ...p1, discount });
           }
         });
+        state.products.forEach(p => {
+          console.log(p.name, p.cartQuantity);
+        })
+        console.log('---')
+        // @ts-ignore
+        state.cart[userId].forEach(p => {
+          console.log(p.name,p.cartQuantity);
+        })
 
       });
 

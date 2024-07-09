@@ -5,7 +5,7 @@ import { SortDropDown } from './SortDropDown';
 import { Pagination } from './Pagination';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
-import { addToCart, removeFromCart, fetchAllProducts,pushCart } from '../../store/productsSlice';
+import { addToCart, removeFromCart, fetchAllProducts,pushCart,fetchCart } from '../../store/productsSlice';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 
@@ -95,6 +95,13 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
     }
     dispatch(fetchAllProducts());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (userId) {
+      // @ts-ignore
+      dispatch(fetchCart(userId));
+    }
+  }, [dispatch, userId]);
 
   useEffect(() => {
     handleSortChange({ target: { value: sort } } as SelectChangeEvent<string>);
