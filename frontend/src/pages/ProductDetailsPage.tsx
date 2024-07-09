@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { ProductDetails } from '../components/ProductDetails/ProductDetails';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -74,7 +74,9 @@ const ProductDetailsPage = () => {
     };
   }, [token, userId, navigate]);
 
-
+  const handleBack = () => {
+    navigate(`/user/${userId}/${token}/products`); // Navigate back to the previous page
+  };
 
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);

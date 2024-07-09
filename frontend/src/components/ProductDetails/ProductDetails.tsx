@@ -188,9 +188,14 @@ export const ProductDetails = ({ userId = '', token }: ProductDetailsProps) => {
       [dispatch]
   );
 
+  const cart = useSelector((state: RootState) => (userId ? state.products.cart[userId] : []) || []);
+
+
   if (!product) {
     return <Typography>Loading...</Typography>;
   }
+
+  const cartProduct = cart.find((p) => p.id1 === product.id1);
 
 
   const handleAddToCart = (quantity:number) => {
@@ -205,6 +210,11 @@ export const ProductDetails = ({ userId = '', token }: ProductDetailsProps) => {
     debouncedPushCart(product.id1||"", quantity);
   };
 
+  let inStock = true;
+  if(product) inStock = product.inStock;
+  // @ts-ignore
+  // @ts-ignore
+  // @ts-ignore
   return (
     <Box sx={detailOuterContainerBox}>
       <Typography variant="h4" sx={typoStyle(isMobile)}>Products Detail</Typography>
@@ -230,14 +240,14 @@ export const ProductDetails = ({ userId = '', token }: ProductDetailsProps) => {
           <Typography variant="body2" sx={descriptionStyle}>{product?.description || 'Loading description...'}</Typography>
 
             <Box sx={buttonBoxStyle(isMobile)}>
-              {product.cartQuantity ? (
+              {cartProduct ? (
                   <Box sx={quantityContainerStyle}>
-                    <IconButton onClick={()=>handleRemoveFromCart(product.cartQuantity)} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
-                    <Typography sx={quantityTextStyle}>{product.cartQuantity}</Typography>
-                    <IconButton onClick={()=>handleAddToCart(product.cartQuantity)} sx={{ color: 'white' }}><AddIcon /></IconButton>
+                    <IconButton onClick={()=>handleRemoveFromCart(cartProduct.cartQuantity)} sx={{ color: 'white' }}><RemoveIcon /></IconButton>
+                    <Typography sx={quantityTextStyle}>{cartProduct.cartQuantity}</Typography>
+                    <IconButton onClick={()=>handleAddToCart(cartProduct.cartQuantity)} sx={{ color: 'white' }  } disabled={!inStock}><AddIcon /></IconButton>
                   </Box>
               ) : (
-                  <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={()=>handleAddToCart(product.cartQuantity)} />
+                  <CustomButton width='133px' isBold={true} text="Add To Cart" onClick={()=>handleAddToCart(0) } />
               )}
 
             {isAdmin && product && (

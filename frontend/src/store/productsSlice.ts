@@ -38,7 +38,7 @@ const api = axios.create({
 export const fetchAllProducts = createAsyncThunk('products/fetchAllProducts', async (_, { rejectWithValue }) => {
   try {
     const response = await api.get('/api/products');
-    console.log('Fetched products:', response.data); 
+    //console.log('Fetched products:', response.data);
     return response.data.map((product: any) => ({
       ...product,
       quantity: product.quantity,
@@ -46,7 +46,7 @@ export const fetchAllProducts = createAsyncThunk('products/fetchAllProducts', as
       inStock: product.quantity > 0
     }));
   } catch (error) {
-    console.error('Error fetching products:', error); 
+    //console.error('Error fetching products:', error);
     if (axios.isAxiosError(error) && error.response) {
       return rejectWithValue(error.response.data);
     } else {
@@ -80,7 +80,7 @@ export const fetchProductById = createAsyncThunk(
   async (productId: string, { rejectWithValue }) => {
     try {
       const response = await api.put(`/api/products/${productId}`);
-      console.log('Fetched product data:', response.data);
+      //console.log('Fetched product data:', response.data);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -154,7 +154,7 @@ export const updateProduct = createAsyncThunk(
   'products/updateProduct',
   async ({ product }: { product: Product }) => {
     const { id1 } = product;
-    console.log('Sending update request for product:', product);
+    //console.log('Sending update request for product:', product);
 
     if (id1) {
       try {
@@ -331,8 +331,6 @@ const productsSlice = createSlice({
       })
       .addCase(fetchCart.fulfilled, (state, action) => {
         const userId = action.meta.arg;
-        console.log("fetch")
-
         action.payload.forEach((item: any) => {
 
           //modify item in state.products

@@ -1,7 +1,10 @@
 const Cart = require('../data/models/cart');
+const {log} = require("debug");
 
 exports.getCart = async (req, res) => {
+    console.log(req);
     try {
+
         let cart = await Cart.findOne({ userId: req.user });
         if (!cart) {
             cart = new Cart({ userId: req.user, items: [] });

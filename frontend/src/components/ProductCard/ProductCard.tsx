@@ -161,6 +161,8 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
 
   console.log('Rendering ProductCard. Is admin:', isAdmin);
 
+  const cart = useSelector((state: RootState) => (userId ? state.products.cart[userId] : []) || []);
+
   return (
     <Box sx={outContainerStyle}>
       <Box sx={productsContainerStyle(isMobile)}>
@@ -171,22 +173,33 @@ export const ProductCard = ({ userId, token }: { userId: string, token: string }
       </Box>
       <Box sx={productsInnerContainerStyle} key={Math.random()}>
         <Box sx={gridContainerStyle(isMobile)}>
-          {displayedProducts.map((product, index) => (
-            <Box key={`${product.id1}-${index}`} sx={gridItemStyle(isMobile)}>
-              <SingleProductCard
-                id1={product.id1|| ""}
-                image={product.image ?? ''}
-                namee={product.name}
-                price={product.price}
-                cartQuantity={product.cartQuantity}
-                onAdd={() => handleAdd(product.id1|| "", product.cartQuantity)}
-                onRemove={() => handleRemove(product.id1|| "", product.cartQuantity)}
-                onEdit={() => handleEdit(product.id1|| "")}
-                isAdmin={isAdmin}
-                inStock={product.inStock}
-              />
-            </Box>
-          ))}
+          {displayedProducts.map((product, index) => {
+            // @ts-ignore
+            const cartProduct = cart.find((p) => p.id1 === product.id1);
+            let quantity = 0
+            if (!cartProduct) {
+              quantity = 0;
+            } else {
+              quantity = cartProduct.cartQuantity;
+            }
+
+            return (
+                <Box key={`${product.id1}-${index}`} sx={gridItemStyle(isMobile)}>
+                  <SingleProductCard
+                      id1={product.id1 || ""}
+                      image={product.image ?? ''}
+                      namee={product.name}
+                      price={product.price}
+                      cartQuantity={quantity}
+                      onAdd={() => handleAdd(product.id1 || "", quantity)}
+                      onRemove={() => handleRemove(product.id1 || "", quantity)}
+                      onEdit={() => handleEdit(product.id1 || "")}
+                      isAdmin={isAdmin}
+                      inStock={product.inStock}
+                  />
+                </Box>
+            )
+          })}
         </Box>
       </Box>
       <Box sx={paginationStyle(isMobile)}>

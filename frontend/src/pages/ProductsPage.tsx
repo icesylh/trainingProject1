@@ -86,8 +86,6 @@ const ProductsPage = () => {
     );
   }
 
-
-
   return (
     <>
       <Box sx={headerStyle}>

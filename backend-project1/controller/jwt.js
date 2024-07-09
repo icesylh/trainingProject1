@@ -46,22 +46,20 @@ module.exports = {
   check: (req, res, next) => {
     try {
       let token = req.headers.authorization;
-      console.log("Received token:", token); 
-      let decoded = decrypt(token);
-      console.log("Decrypted token:", decoded); 
-      let email = decoded.email; 
-      console.log("Decrypted email:", email);
-
-      User.findOne({ email }, (err, doc) => {
-        if (err) res.status(500).send(err);
+      console.log("Received token:", token);
+      let decrypted = decrypt(token);
+      let id = decrypted.userId
+      console.log("Decrypted token id:", id);
+      User.findById(id, (err, doc) => {
+        if (err) return res.status(500).send(err);
         if (doc) {
-          req.user = email;
-          next();
-        } else res.send({ Code: 401, Msg: "No login status" });
+          req.user = id;
+          return next();
+        } else return res.send({ Code: 401, Msg: "No login status" });
       });
     } catch (error) {
-      console.error("Token validation failed:", error); 
-      res.send({ Code: 401, Msg: "Token Failure" });
+      console.error("Token validation failed:", error);
+      return res.send({ Code: 401, Msg: "Token Failure" });
     }
   },
 };
